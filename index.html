@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Find Your Table | 'MOPO'S Dinner Ceremony</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Outfit:wght@300;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1a1512;
+      --cream: #f9f6f2;
+      --gold: #b8860b;
+      --gold-dim: #8b6914;
+      --shadow: rgba(26, 21, 18, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--cream);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      color: var(--ink);
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 12px 48px var(--shadow);
+      padding: 2.5rem;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--ink);
+    }
+    .sub {
+      font-size: 0.95rem;
+      font-weight: 300;
+      color: #666;
+      margin-bottom: 2rem;
+    }
+    .input-wrap {
+      position: relative;
+      flex: 1;
+    }
+    .input-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    input {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+    .suggestions {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      margin-top: 2px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px var(--shadow);
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 10;
+      display: none;
+    }
+    .suggestions.visible { display: block; }
+    .suggestion {
+      padding: 0.7rem 1rem;
+      cursor: pointer;
+      font-size: 0.95rem;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .suggestion:last-child { border-bottom: none; }
+    .suggestion:hover { background: #f9f6f2; }
+    input:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.15);
+    }
+    button {
+      padding: 0.9rem 1.5rem;
+      background: var(--gold);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-weight: 500;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover { background: var(--gold-dim); }
+    button:active { transform: scale(0.98); }
+    #result {
+      min-height: 2rem;
+      margin-top: 1rem;
+      font-size: 1.05rem;
+    }
+    #result.found { color: var(--gold-dim); font-weight: 500; }
+    #result.error { color: #c0392b; }
+    .admin-link {
+      margin-top: 2rem;
+      font-size: 0.85rem;
+    }
+    .admin-link a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+    .admin-link a:hover { text-decoration: underline; }
+
+    @media (max-width: 480px) {
+      body { padding: 1rem; min-height: 100vh; min-height: 100dvh; }
+      .card { padding: 1.5rem; border-radius: 12px; }
+      h1 { font-size: 1.35rem; }
+      .sub { font-size: 0.9rem; margin-bottom: 1.5rem; }
+      .input-row { flex-direction: column; gap: 0.5rem; }
+      .input-row button { width: 100%; min-height: 48px; padding: 1rem; }
+      input { padding: 1rem; font-size: 16px; min-height: 48px; }
+      .suggestion { padding: 1rem; min-height: 48px; }
+      .suggestions { max-height: 180px; }
+      .admin-link { margin-top: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1> WELCOME 🎉 <br> ~~~~~~~~~~~~~~~~~~~~~~~~~ <br> The Moment To Celebrate A Graceful Milestone Has Arrived.  <br>~~~~~~~~~~~~~~~~~~~~~~~~ <br> Kindly Find Your Table</h1>
+    <p class="sub">Enter your name to see your table assignment</p>
+
+    <div class="input-row">
+      <div class="input-wrap">
+        <input id="name" placeholder="e.g. Mary Johnson" type="text" autocomplete="off">
+        <div id="suggestions" class="suggestions" role="listbox"></div>
+      </div>
+      <button onclick="findTable()">Find</button>
+    </div>
+
+    <p id="result"></p>
+
+    <p class="admin-link"><a href="admin.html">Admin → Manage guests</a></p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

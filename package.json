@@ -1,0 +1,14 @@
+{
+  "name": "table-finder-system",
+  "version": "1.0.0",
+  "description": "Table finder system for dinner ceremony guests",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node seed-database.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.2.2",
+    "express": "^4.18.2"
+  }
+}

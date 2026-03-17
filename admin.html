@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Admin | Table Finder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Outfit:wght@300;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1a1512;
+      --cream: #f9f6f2;
+      --gold: #b8860b;
+      --gold-dim: #8b6914;
+      --shadow: rgba(26, 21, 18, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--cream);
+      min-height: 100vh;
+      padding: 2rem;
+      color: var(--ink);
+    }
+    .wrap { max-width: 800px; margin: 0 auto; }
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .stats {
+      background: #fff;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px var(--shadow);
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+    }
+    .add-form {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px var(--shadow);
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .field label { font-size: 0.85rem; color: #666; }
+    .field input {
+      padding: 0.6rem 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      min-width: 160px;
+    }
+    button {
+      padding: 0.6rem 1.2rem;
+      background: var(--gold);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    button:hover { background: var(--gold-dim); }
+    .search-bar {
+      margin-bottom: 1rem;
+    }
+    .search-bar input {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+    }
+    .search-bar input::placeholder {
+      color: #999;
+    }
+    .table-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .table-tabs button {
+      padding: 0.5rem 0.9rem;
+      font-size: 0.9rem;
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid #ddd;
+    }
+    .table-tabs button:hover {
+      border-color: var(--gold);
+      color: var(--gold-dim);
+    }
+    .table-tabs button.active {
+      background: var(--gold);
+      color: #fff;
+      border-color: var(--gold);
+    }
+    .list {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px var(--shadow);
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #eee;
+    }
+    th {
+      background: #f8f8f8;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    tr:last-child td { border-bottom: none; }
+    .seated-cell { text-align: center; width: 80px; }
+    .seated-cell input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    .seated-cell input[type="checkbox"]:checked {
+      accent-color: #2e7d32;
+    }
+    .actions-cell {
+      white-space: nowrap;
+      text-align: right;
+    }
+    .action-btn {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      margin-left: 0.25rem;
+    }
+    .action-btn.danger {
+      background: #c0392b;
+    }
+    .back { margin-bottom: 1rem; }
+    .back a {
+      color: var(--gold);
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+    .back a:hover { text-decoration: underline; }
+    .login-card {
+      max-width: 360px;
+      margin: 4rem auto;
+      padding: 2rem;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 12px 48px var(--shadow);
+      text-align: center;
+    }
+    .login-card h1 { margin-bottom: 1rem; }
+    .login-card input[type="password"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    .login-error { color: #c0392b; font-size: 0.9rem; margin-bottom: 1rem; }
+    .logout { float: right; font-size: 0.9rem; }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.2);
+      max-width: 360px;
+      width: 90%;
+    }
+    .modal h3 { margin-bottom: 0.75rem; font-size: 1.1rem; }
+    .modal p { color: #666; font-size: 0.95rem; margin-bottom: 1rem; }
+    .modal input { width: 100%; padding: 0.7rem; margin-bottom: 1rem; }
+    .modal-buttons { display: flex; gap: 0.5rem; justify-content: flex-end; }
+    .modal-buttons button.secondary { background: #888; }
+
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      .wrap { max-width: 100%; }
+      h1 { font-size: 1.4rem; }
+      .add-form { flex-direction: column; }
+      .add-form .field { min-width: 100%; }
+      .add-form .field input { min-width: 100%; min-height: 48px; padding: 0.75rem; }
+      .add-form button { width: 100%; min-height: 48px; }
+      .table-tabs button { padding: 0.6rem 0.8rem; min-height: 44px; }
+      .list { border-radius: 8px; overflow-x: auto; }
+      table { min-width: 320px; }
+      th, td { padding: 0.6rem 0.75rem; font-size: 0.9rem; }
+      .seated-cell input[type="checkbox"] { width: 22px; height: 22px; }
+      .back { margin-bottom: 0.75rem; }
+      .logout { float: none; display: block; margin-top: 0.5rem; }
+      .modal { margin: 1rem; width: calc(100% - 2rem); max-width: none; }
+      .modal input { min-height: 48px; padding: 0.85rem; font-size: 16px; }
+      .modal-buttons { flex-direction: column; }
+      .modal-buttons button { width: 100%; min-height: 48px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loginScreen" class="login-card" style="display: none;">
+    <h1>Admin access</h1>
+    <p style="color: #666; margin-bottom: 1.5rem; font-size: 0.95rem;">Enter the admin password</p>
+    <p id="loginError" class="login-error" style="display: none;"></p>
+    <input id="adminPassword" type="password" placeholder="Password" autocomplete="current-password">
+    <button onclick="doLogin()" style="width: 100%;">Log in</button>
+    <p class="back" style="margin-top: 1.5rem;"><a href="index.html">← Back to guest finder</a></p>
+  </div>
+
+  <div id="adminContent" class="wrap" style="display: none;">
+    <p class="back"><a href="index.html">← Back to guest finder</a> <span class="logout"><button onclick="doLogout()" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Log out</button></span></p>
+    <h1>Manage Guests</h1>
+    <div class="stats" id="stats">Loading…</div>
+
+    <div class="add-form">
+      <div class="field">
+        <label>Name</label>
+        <input id="newName" placeholder="Full name" type="text">
+      </div>
+      <div class="field">
+        <label>Table</label>
+        <input id="newTable" type="number" min="1" max="99" value="1" placeholder="1">
+      </div>
+      <button onclick="addGuest()">Add Guest</button>
+    </div>
+
+    <div class="search-bar">
+      <input id="searchGuests" type="text" placeholder="Search guests by name…">
+    </div>
+
+    <div class="table-tabs" id="tableTabs">
+      <button type="button" class="active" data-table="0">All</button>
+      <button type="button" data-table="1">Table 1</button>
+      <button type="button" data-table="2">Table 2</button>
+      <button type="button" data-table="3">Table 3</button>
+      <button type="button" data-table="4">Table 4</button>
+      <button type="button" data-table="5">Table 5</button>
+      <button type="button" data-table="6">Table 6</button>
+      <button type="button" data-table="7">Table 7</button>
+      <button type="button" data-table="8">Table 8</button>
+      <button type="button" data-table="9">Table 9</button>
+      <button type="button" data-table="10">Table 10</button>
+    </div>
+
+    <div class="list">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Table</th>
+            <th class="seated-cell">Seated</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="guestList"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="confirmModal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3 id="confirmModalTitle">Confirm attendance change</h3>
+      <p id="confirmModalMsg">Enter admin password to confirm:</p>
+      <input id="confirmPassword" type="password" placeholder="Admin password" onkeydown="if(event.key==='Enter')submitAttendanceChange();if(event.key==='Escape')closeConfirmModal();">
+      <p id="confirmModalError" class="login-error" style="display: none; margin-top: -0.5rem;"></p>
+      <div class="modal-buttons">
+        <button type="button" class="secondary" onclick="closeConfirmModal()">Cancel</button>
+        <button type="button" onclick="submitAttendanceChange()">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="editModal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3>Edit guest table</h3>
+      <p>Change table for <strong id="editGuestName"></strong>.</p>
+      <input id="editTableNumber" type="number" min="1" max="99" placeholder="New table number">
+      <input id="editPassword" type="password" placeholder="Admin password" onkeydown="if(event.key==='Enter')submitEditGuest();if(event.key==='Escape')closeEditModal();">
+      <p id="editError" class="login-error" style="display: none; margin-top: -0.5rem;"></p>
+      <div class="modal-buttons">
+        <button type="button" class="secondary" onclick="closeEditModal()">Cancel</button>
+        <button type="button" onclick="submitEditGuest()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="deleteModal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3>Delete guest</h3>
+      <p>Are you sure you want to remove <strong id="deleteGuestName"></strong> from the guest list?</p>
+      <input id="deletePassword" type="password" placeholder="Admin password" onkeydown="if(event.key==='Enter')submitDeleteGuest();if(event.key==='Escape')closeDeleteModal();">
+      <p id="deleteError" class="login-error" style="display: none; margin-top: -0.5rem;"></p>
+      <div class="modal-buttons">
+        <button type="button" class="secondary" onclick="closeDeleteModal()">Cancel</button>
+        <button type="button" onclick="submitDeleteGuest()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_TOKEN_KEY = 'admin_token';
+    let allGuests = [];
+    let selectedTable = 0;
+    let pendingChange = null; // { guestId, guestName, newSeated }
+    let pendingEdit = null;   // { guestId, guestName, table }
+    let pendingDelete = null; // { guestId, guestName }
+
+    function getAuthHeaders() {
+      const token = sessionStorage.getItem(ADMIN_TOKEN_KEY);
+      return token ? { 'X-Admin-Token': token } : {};
+    }
+
+    function showLogin() {
+      document.getElementById('loginScreen').style.display = 'block';
+      document.getElementById('adminContent').style.display = 'none';
+    }
+
+    function showAdmin() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminContent').style.display = 'block';
+      loadGuests();
+    }
+
+    async function doLogin() {
+      const password = document.getElementById('adminPassword').value;
+      const errEl = document.getElementById('loginError');
+      errEl.style.display = 'none';
+      if (!password) {
+        errEl.textContent = 'Please enter the password.';
+        errEl.style.display = 'block';
+        return;
+      }
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+        if (data.token) {
+          sessionStorage.setItem(ADMIN_TOKEN_KEY, data.token);
+          showAdmin();
+        } else {
+          errEl.textContent = data.error || 'Invalid password.';
+          errEl.style.display = 'block';
+        }
+      } catch (e) {
+        errEl.textContent = 'Could not connect.';
+        errEl.style.display = 'block';
+      }
+    }
+
+    async function doLogout() {
+      try {
+        await fetch('/api/admin/logout', {
+          method: 'POST',
+          headers: getAuthHeaders()
+        });
+      } catch (_) {}
+      sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+      showLogin();
+    }
+
+    async function loadGuests() {
+      try {
+        const res = await fetch('/api/guests', { headers: getAuthHeaders() });
+        if (res.status === 401) {
+          showLogin();
+          return;
+        }
+        const { guests, count } = await res.json();
+        allGuests = guests;
+        renderGuestList();
+      } catch (e) {
+        document.getElementById('stats').textContent = 'Could not load guests.';
+        showLogin();
+      }
+    }
+
+    function escapeHtml(s) {
+      const div = document.createElement('div');
+      div.textContent = s;
+      return div.innerHTML;
+    }
+
+    function renderGuestList() {
+      const q = (document.getElementById('searchGuests')?.value || '').trim().toLowerCase();
+      let filtered = selectedTable ? allGuests.filter(g => g.table_number === selectedTable) : allGuests;
+      if (q) filtered = filtered.filter(g => g.name.toLowerCase().includes(q));
+      const seatedCount = allGuests.filter(g => g.seated).length;
+      const notSeatedCount = allGuests.length - seatedCount;
+      document.getElementById('stats').innerHTML = `${allGuests.length} guest${allGuests.length !== 1 ? 's' : ''} in database &middot; <span style="color:#2e7d32">${seatedCount} seated</span> &middot; ${notSeatedCount} not seated${q ? ` &middot; <em>${filtered.length} match${filtered.length !== 1 ? 'es' : ''}</em>` : ''}`;
+      const tbody = document.getElementById('guestList');
+      tbody.innerHTML = filtered.map((g, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${escapeHtml(g.name)}</td>
+          <td>Table ${g.table_number}</td>
+          <td class="seated-cell"><input type="checkbox" ${g.seated ? 'checked' : ''} data-id="${g.id}" title="${g.seated ? 'Click to unmark seated' : 'Click to mark seated'}"></td>
+          <td class="actions-cell">
+            <button type="button" class="action-btn" data-action="edit" data-id="${g.id}">Edit table</button>
+            <button type="button" class="action-btn danger" data-action="delete" data-id="${g.id}">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    document.getElementById('guestList')?.parentElement?.addEventListener('change', (e) => {
+      const cb = e.target.closest('input[type="checkbox"][data-id]');
+      if (!cb) return;
+      const id = parseInt(cb.dataset.id, 10);
+      const guest = allGuests.find(g => g.id === id);
+      const name = guest ? guest.name : '';
+      const newSeated = cb.checked;
+      const wasSeated = guest ? guest.seated : false;
+      if (newSeated === wasSeated) {
+        cb.checked = wasSeated;
+        return;
+      }
+      pendingChange = { guestId: id, guestName: name, newSeated };
+      document.getElementById('confirmModalTitle').textContent = newSeated ? 'Mark as seated?' : 'Unmark seated?';
+      document.getElementById('confirmModalMsg').textContent = `Enter admin password to ${newSeated ? 'mark' : 'unmark'} "${name}" as seated:`;
+      document.getElementById('confirmPassword').value = '';
+      document.getElementById('confirmModalError').style.display = 'none';
+      document.getElementById('confirmModal').classList.remove('hidden');
+      document.getElementById('confirmPassword').focus();
+    });
+
+    function closeConfirmModal() {
+      pendingChange = null;
+      document.getElementById('confirmModal').classList.add('hidden');
+      renderGuestList();
+    }
+
+    async function submitAttendanceChange() {
+      if (!pendingChange) return;
+      const password = document.getElementById('confirmPassword').value;
+      const errEl = document.getElementById('confirmModalError');
+      errEl.style.display = 'none';
+      if (!password) {
+        errEl.textContent = 'Please enter the password.';
+        errEl.style.display = 'block';
+        return;
+      }
+      try {
+        const res = await fetch('/api/guests/' + pendingChange.guestId + '/seated', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+          body: JSON.stringify({ password, seated: pendingChange.newSeated })
+        });
+        const data = await res.json();
+        if (res.status === 401) {
+          errEl.textContent = data.error || 'Invalid password.';
+          errEl.style.display = 'block';
+          return;
+        }
+        if (data.success) {
+          const g = allGuests.find(x => x.id === pendingChange.guestId);
+          if (g) g.seated = pendingChange.newSeated ? 1 : 0;
+          closeConfirmModal();
+        }
+      } catch (e) {
+        errEl.textContent = 'Could not update.';
+        errEl.style.display = 'block';
+      }
+    }
+
+    async function addGuest() {
+      const name = document.getElementById('newName').value?.trim();
+      const table = document.getElementById('newTable').value;
+      if (!name) return;
+      try {
+        const res = await fetch('/api/guests', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+          body: JSON.stringify({ name, table_number: parseInt(table, 10) || 1 })
+        });
+        if (res.status === 401) { showLogin(); return; }
+        const data = await res.json();
+        if (data.name) {
+          document.getElementById('newName').value = '';
+          loadGuests();
+        }
+      } catch (e) {
+        alert('Failed to add guest.');
+      }
+    }
+
+    document.getElementById('searchGuests')?.addEventListener('input', renderGuestList);
+
+    document.getElementById('tableTabs')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      selectedTable = parseInt(btn.dataset.table, 10) || 0;
+      document.querySelectorAll('.table-tabs button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderGuestList();
+    });
+    document.getElementById('guestList')?.parentElement?.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+      const id = parseInt(btn.dataset.id, 10);
+      const guest = allGuests.find(g => g.id === id);
+      if (!guest) return;
+      const action = btn.dataset.action;
+      if (action === 'edit') {
+        pendingEdit = { guestId: id, guestName: guest.name, table: guest.table_number };
+        const tableInput = document.getElementById('editTableNumber');
+        document.getElementById('editGuestName').textContent = guest.name;
+        tableInput.value = guest.table_number;
+        document.getElementById('editPassword').value = '';
+        document.getElementById('editError').style.display = 'none';
+        document.getElementById('editModal').classList.remove('hidden');
+        tableInput.focus();
+      } else if (action === 'delete') {
+        pendingDelete = { guestId: id, guestName: guest.name };
+        document.getElementById('deleteGuestName').textContent = guest.name;
+        document.getElementById('deletePassword').value = '';
+        document.getElementById('deleteError').style.display = 'none';
+        document.getElementById('deleteModal').classList.remove('hidden');
+        document.getElementById('deletePassword').focus();
+      }
+    });
+
+    async function submitEditGuest() {
+      if (!pendingEdit) return;
+      const tableInput = document.getElementById('editTableNumber');
+      const passwordInput = document.getElementById('editPassword');
+      const errEl = document.getElementById('editError');
+      errEl.style.display = 'none';
+      const newTable = parseInt(tableInput.value, 10);
+      if (!newTable || newTable < 1) {
+        errEl.textContent = 'Please enter a valid table number.';
+        errEl.style.display = 'block';
+        return;
+      }
+      const password = passwordInput.value;
+      if (!password) {
+        errEl.textContent = 'Please enter the admin password.';
+        errEl.style.display = 'block';
+        return;
+      }
+      try {
+        const res = await fetch('/api/guests/' + pendingEdit.guestId + '/table', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+          body: JSON.stringify({ password, table_number: newTable })
+        });
+        const data = await res.json();
+        if (res.status === 401) {
+          errEl.textContent = data.error || 'Invalid password.';
+          errEl.style.display = 'block';
+          return;
+        }
+        if (data.success) {
+          const g = allGuests.find(x => x.id === pendingEdit.guestId);
+          if (g) g.table_number = newTable;
+          document.getElementById('editModal').classList.add('hidden');
+          pendingEdit = null;
+          renderGuestList();
+        }
+      } catch (e) {
+        errEl.textContent = 'Could not update guest.';
+        errEl.style.display = 'block';
+      }
+    }
+
+    function closeEditModal() {
+      pendingEdit = null;
+      document.getElementById('editModal').classList.add('hidden');
+    }
+
+    async function submitDeleteGuest() {
+      if (!pendingDelete) return;
+      const passwordInput = document.getElementById('deletePassword');
+      const errEl = document.getElementById('deleteError');
+      errEl.style.display = 'none';
+      const password = passwordInput.value;
+      if (!password) {
+        errEl.textContent = 'Please enter the admin password.';
+        errEl.style.display = 'block';
+        return;
+      }
+      try {
+        const res = await fetch('/api/guests/' + pendingDelete.guestId, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+          body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+        if (res.status === 401) {
+          errEl.textContent = data.error || 'Invalid password.';
+          errEl.style.display = 'block';
+          return;
+        }
+        if (data.success) {
+          allGuests = allGuests.filter(x => x.id !== pendingDelete.guestId);
+          document.getElementById('deleteModal').classList.add('hidden');
+          pendingDelete = null;
+          renderGuestList();
+        }
+      } catch (e) {
+        errEl.textContent = 'Could not delete guest.';
+        errEl.style.display = 'block';
+      }
+    }
+
+    function closeDeleteModal() {
+      pendingDelete = null;
+      document.getElementById('deleteModal').classList.add('hidden');
+    }
+
+    if (sessionStorage.getItem(ADMIN_TOKEN_KEY)) {
+      showAdmin();
+    } else {
+      showLogin();
+    }
+  </script>
+</body>
+</html>

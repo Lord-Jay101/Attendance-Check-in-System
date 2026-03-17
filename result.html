@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Your Table | Dinner Ceremony</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Outfit:wght@300;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1a1512;
+      --cream: #f9f6f2;
+      --gold: #b8860b;
+      --gold-dim: #8b6914;
+      --shadow: rgba(26, 21, 18, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--cream);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      color: var(--ink);
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 12px 48px var(--shadow);
+      padding: 2.5rem;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--ink);
+    }
+    .sub { font-size: 0.95rem; font-weight: 300; color: #666; margin-bottom: 1.5rem; }
+    .table-num {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 2rem;
+    }
+    .seated-section {
+      text-align: left;
+      padding: 1.25rem;
+      background: #f9f6f2;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+    .seated-section.already-seated {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    .seated-section.just-seated {
+      background: #e8f5e9;
+      color: #2e7d32;
+      text-align: center;
+    }
+    .radio-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 0.75rem;
+    }
+    .radio-row input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--gold);
+    }
+    .radio-row label {
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--gold);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-weight: 500;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:hover { background: var(--gold-dim); }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .back {
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+    }
+    .back a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+    .back a:hover { text-decoration: underline; }
+
+    @media (max-width: 480px) {
+      body { padding: 1rem; min-height: 100vh; min-height: 100dvh; }
+      .card { padding: 1.5rem; border-radius: 12px; }
+      h1 { font-size: 1.35rem; }
+      .sub { font-size: 0.9rem; }
+      .table-num { font-size: 2rem; margin-bottom: 1.5rem; }
+      .seated-section { padding: 1rem; }
+      .radio-row { margin-top: 1rem; padding: 0.75rem 0; }
+      .radio-row input[type="radio"] { width: 22px; height: 22px; min-width: 22px; }
+      .radio-row label { font-size: 1.05rem; padding: 0.5rem 0; }
+    }
+    @media (max-width: 480px) {
+      button { width: 100%; min-height: 48px; padding: 1rem; font-size: 1.05rem; }
+      .back { margin-top: 1.25rem; }
+      .back a { font-size: 1rem; padding: 0.5rem 0; display: inline-block; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 id="guestName">Your Table</h1>
+    <p class="sub">Your table assignment</p>
+
+    <div class="table-num" id="tableDisplay">—</div>
+
+    <div id="seatedSection" class="seated-section">
+      <p><strong>Mark your attendance</strong></p>
+      <div class="radio-row">
+        <input type="radio" id="notSeated" name="seated" value="0" checked>
+        <label for="notSeated">I am not yet seated</label>
+      </div>
+      <div class="radio-row">
+        <input type="radio" id="seated" name="seated" value="1">
+        <label for="seated">I am seated</label>
+      </div>
+      <button id="submitBtn" type="button">Confirm</button>
+    </div>
+
+    <div id="justSeated" class="seated-section just-seated" style="display: none;">
+      <strong>✓ Seated</strong>
+      <p style="margin-top: 1rem; font-size: 1rem;">Please join us in celebrating</p>
+      <p style="margin: 0.75rem 0; font-size: 1.1rem;">🎂 Mopo's 60th Birthday 🎂</p>
+      <p style="font-size: 0.95rem;">Enjoy the evening!</p>
+    </div>
+
+    <div id="alreadySeated" class="seated-section already-seated" style="display: none;">
+      <strong>✓ Already seated</strong>
+      <p style="margin-top: 0.5rem; font-size: 0.95rem;">This guest has already been marked as seated.</p>
+    </div>
+
+    <p class="back"><a href="index.html">← Find another guest</a></p>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const name = params.get('name') || '';
+    const table = params.get('table') || '';
+    const id = params.get('id') || '';
+    const seated = params.get('seated') === '1';
+
+    document.getElementById('guestName').textContent = name || 'Guest';
+    document.getElementById('tableDisplay').textContent = table ? `Table ${table}` : '—';
+
+    const seatedSection = document.getElementById('seatedSection');
+    const justSeated = document.getElementById('justSeated');
+    const alreadySeated = document.getElementById('alreadySeated');
+    const submitBtn = document.getElementById('submitBtn');
+    const radioSeated = document.getElementById('seated');
+
+    if (seated) {
+      seatedSection.style.display = 'none';
+      justSeated.style.display = 'none';
+      alreadySeated.style.display = 'block';
+    } else {
+      radioSeated.checked = false;
+      document.getElementById('notSeated').checked = true;
+
+      submitBtn.addEventListener('click', async () => {
+        const isSeated = document.getElementById('seated').checked;
+        if (!isSeated || !id) return;
+
+        submitBtn.disabled = true;
+        try {
+          const res = await fetch('/api/guests/' + id + '/seat', { method: 'PATCH' });
+          const data = await res.json();
+          if (data.success) {
+            seatedSection.style.display = 'none';
+            alreadySeated.style.display = 'none';
+            justSeated.style.display = 'block';
+          }
+        } catch (e) {
+          submitBtn.disabled = false;
+        }
+      });
+    }
+  </script>
+</body>
+</html>
