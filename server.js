@@ -568,8 +568,9 @@ app.post('/api/guests/import', requireAdmin, (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`${EVENT_NAME} running at http://localhost:${PORT}`);
   console.log(`Guest check-in: http://localhost:${PORT}/`);
   console.log(`Admin:          http://localhost:${PORT}/admin.html`);
 });
+
