@@ -1,41 +1,30 @@
 (function () {
-  const input = document.getElementById('name');
+  const form = document.getElementById('checkInForm');
+  const nameInput = document.getElementById('name');
+  const checkInBtn = document.getElementById('checkInBtn');
+  const statusEl = document.getElementById('status');
+  const formPanel = document.getElementById('formPanel');
+  const outcomeNotFound = document.getElementById('outcomeNotFound');
+  const tryAgainBtn = document.getElementById('tryAgainBtn');
   const suggestionsEl = document.getElementById('suggestions');
-  const resultEl = document.getElementById('result');
+
+  if (!form || !nameInput) return;
+
+  let submitting = false;
   let debounceTimer;
-  let currentGuests = [];
+  let currentSuggestions = [];
+  let activeIndex = -1;
 
-  if (!input || !suggestionsEl) return;
-
-  function hideSuggestions() {
-    suggestionsEl.classList.remove('visible');
-    suggestionsEl.innerHTML = '';
-    currentGuests = [];
-  }
-
-  function showSuggestions(guests) {
-    currentGuests = guests;
-    if (!guests.length) {
-      hideSuggestions();
-      return;
-    }
-    suggestionsEl.innerHTML = guests.map((g, i) =>
-      `<div class="suggestion" data-index="${i}" role="option">${escapeHtml(g.name)}</div>`
-    ).join('');
-    suggestionsEl.classList.add('visible');
-
-    suggestionsEl.querySelectorAll('.suggestion').forEach(el => {
-      el.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        const idx = parseInt(el.dataset.index, 10);
-        if (currentGuests[idx]) {
-          input.value = currentGuests[idx].name;
-          hideSuggestions();
-          input.focus();
-        }
-      });
-    });
-  }
+  fetch('/api/event')
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.name) {
+        const title = document.getElementById('eventTitle');
+        if (title) title.textContent = data.name;
+        document.title = data.name;
+      }
+    })
+    .catch(() => {});
 
   function escapeHtml(s) {
     const div = document.createElement('div');
@@ -43,80 +32,204 @@
     return div.innerHTML;
   }
 
+  function hideSuggestions() {
+    if (!suggestionsEl) return;
+    suggestionsEl.classList.remove('visible');
+    suggestionsEl.innerHTML = '';
+    currentSuggestions = [];
+    activeIndex = -1;
+    nameInput.setAttribute('aria-expanded', 'false');
+  }
+
+  function highlightActive() {
+    if (!suggestionsEl) return;
+    suggestionsEl.querySelectorAll('.suggestion').forEach((el, i) => {
+      el.classList.toggle('active', i === activeIndex);
+    });
+  }
+
+  function selectSuggestion(name) {
+    nameInput.value = name;
+    hideSuggestions();
+    nameInput.focus();
+  }
+
+  function showSuggestions(list) {
+    currentSuggestions = list || [];
+    activeIndex = -1;
+    if (!suggestionsEl) return;
+    if (!currentSuggestions.length) {
+      hideSuggestions();
+      return;
+    }
+    suggestionsEl.innerHTML = currentSuggestions
+      .map(
+        (g, i) =>
+          `<div class="suggestion" data-index="${i}" role="option">${escapeHtml(g.name)}</div>`
+      )
+      .join('');
+    suggestionsEl.classList.add('visible');
+    nameInput.setAttribute('aria-expanded', 'true');
+
+    suggestionsEl.querySelectorAll('.suggestion').forEach((el) => {
+      el.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        const idx = parseInt(el.dataset.index, 10);
+        if (currentSuggestions[idx]) selectSuggestion(currentSuggestions[idx].name);
+      });
+    });
+  }
+
   async function fetchSuggestions(q) {
-    if (!q.trim()) {
+    if (q.trim().length < 4) {
       hideSuggestions();
       return;
     }
     try {
-      const res = await fetch('/api/search?q=' + encodeURIComponent(q));
+      const res = await fetch('/api/check-in/suggest?q=' + encodeURIComponent(q.trim()));
       const data = await res.json();
-      showSuggestions(data.guests || []);
+      showSuggestions(data.suggestions || []);
     } catch {
       hideSuggestions();
     }
   }
 
-  input.addEventListener('input', () => {
+  nameInput.addEventListener('input', () => {
     clearTimeout(debounceTimer);
-    const q = input.value.trim();
-    resultEl.className = '';
-    resultEl.textContent = '';
-    if (q.length < 2) {
+    hideStatus();
+    const q = nameInput.value;
+    if (q.trim().length < 4) {
       hideSuggestions();
       return;
     }
-    debounceTimer = setTimeout(() => fetchSuggestions(q), 200);
+    debounceTimer = setTimeout(() => fetchSuggestions(q), 180);
   });
 
-  input.addEventListener('focus', () => {
-    if (currentGuests.length) suggestionsEl.classList.add('visible');
+  nameInput.addEventListener('keydown', (e) => {
+    if (!currentSuggestions.length) {
+      if (e.key === 'Escape') hideSuggestions();
+      return;
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIndex = (activeIndex + 1) % currentSuggestions.length;
+      highlightActive();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIndex = activeIndex <= 0 ? currentSuggestions.length - 1 : activeIndex - 1;
+      highlightActive();
+    } else if (e.key === 'Enter' && activeIndex >= 0) {
+      e.preventDefault();
+      selectSuggestion(currentSuggestions[activeIndex].name);
+    } else if (e.key === 'Escape') {
+      hideSuggestions();
+    }
   });
 
-  input.addEventListener('blur', () => {
+  nameInput.addEventListener('blur', () => {
     setTimeout(hideSuggestions, 150);
   });
 
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') hideSuggestions();
+  function hideStatus() {
+    statusEl.className = 'status';
+    statusEl.textContent = '';
+  }
+
+  function showStatus(type, message) {
+    statusEl.className = 'status visible ' + type;
+    statusEl.textContent = message;
+  }
+
+  function showForm() {
+    if (outcomeNotFound) outcomeNotFound.classList.remove('visible');
+    formPanel.classList.remove('hidden');
+    hideStatus();
+    checkInBtn.disabled = false;
+    submitting = false;
+    nameInput.focus();
+  }
+
+  function showNotFound() {
+    formPanel.classList.add('hidden');
+    hideStatus();
+    if (outcomeNotFound) outcomeNotFound.classList.add('visible');
+  }
+
+  tryAgainBtn?.addEventListener('click', () => {
+    showForm();
   });
 
-  window.findTable = async function () {
-    const name = (input && input.value || '').trim();
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (submitting) return;
 
-    resultEl.className = '';
-    resultEl.textContent = '';
+    const name = (nameInput.value || '').trim();
+    hideStatus();
     hideSuggestions();
 
     if (!name) {
-      resultEl.className = 'error';
-      resultEl.textContent = 'Please enter your name.';
+      showStatus('error', 'Please enter your name.');
+      nameInput.focus();
       return;
     }
 
+    submitting = true;
+    checkInBtn.disabled = true;
+    showStatus('loading', 'Checking your RSVP…');
+
     try {
-      const res = await fetch('/find-table', {
+      const res = await fetch('/api/check-in', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name })
       });
-      const data = await res.json();
 
-      if (data.table != null) {
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        showStatus('error', 'Something went wrong. Please try again.');
+        submitting = false;
+        checkInBtn.disabled = false;
+        return;
+      }
+
+      if (data.status === 'found') {
         const params = new URLSearchParams({
-          name: data.name,
-          table: data.table,
-          id: data.id || '',
-          seated: data.seated ? '1' : '0'
+          id: String(data.id || ''),
+          name: data.name || name,
+          firstName: data.firstName || ''
         });
         window.location.href = 'result.html?' + params.toString();
-      } else {
-        resultEl.className = 'error';
-        resultEl.textContent = data.error || 'Name not found. Please check your spelling or ask a host.';
+        return;
       }
-    } catch (err) {
-      resultEl.className = 'error';
-      resultEl.textContent = 'Unable to reach the server. Please try again.';
+
+      if (data.status === 'already_checked_in') {
+        const params = new URLSearchParams({
+          id: String(data.id || ''),
+          name: data.name || name,
+          firstName: data.firstName || '',
+          status: 'already',
+          time: data.checkedInAtDisplay || data.checkedInAt || ''
+        });
+        window.location.href = 'result.html?' + params.toString();
+        return;
+      }
+
+      if (data.status === 'not_found') {
+        showNotFound();
+        return;
+      }
+
+      showStatus('error', data.error || 'Unable to check in. Please try again.');
+      submitting = false;
+      checkInBtn.disabled = false;
+    } catch {
+      showStatus('error', 'Unable to reach the server. Please try again.');
+      submitting = false;
+      checkInBtn.disabled = false;
     }
-  };
+  });
+
+  nameInput.focus();
 })();

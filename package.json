@@ -1,7 +1,7 @@
 {
-  "name": "table-finder-system",
-  "version": "1.0.0",
-  "description": "Table finder system for dinner ceremony guests",
+  "name": "workshop-attendance-check-in",
+  "version": "2.0.0",
+  "description": "Workshop attendance check-in system for conference guests",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "better-sqlite3": "^9.2.2",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "multer": "^2.4.0",
+    "xlsx": "^0.18.5"
   }
 }

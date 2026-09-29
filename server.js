@@ -1,21 +1,46 @@
 const express = require('express');
 const path = require('path');
 const crypto = require('crypto');
+const multer = require('multer');
+const XLSX = require('xlsx');
 const {
   initDatabase,
   findGuestByName,
-  searchGuests,
+  findGuestById,
+  checkInGuest,
+  firstNameFrom,
+  suggestGuestsByNamePrefix,
   addGuest,
+  importGuests,
   getAllGuests,
   getGuestCount,
-  markGuestSeated,
+  getAttendanceStats,
   setGuestSeated,
-  updateGuestTable,
-  deleteGuest
+  updateGuest,
+  deleteGuest,
+  bulkCheckIn,
+  bulkCheckOut,
+  bulkDeleteGuests
 } = require('./database');
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin2024';
+const EVENT_NAME = process.env.EVENT_NAME || '2026 Africa Leadership Summit';
 const adminSessions = new Map(); // token -> expiry
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+  fileFilter(req, file, cb) {
+    const name = (file.originalname || '').toLowerCase();
+    const ok =
+      name.endsWith('.xlsx') ||
+      name.endsWith('.xls') ||
+      name.endsWith('.csv') ||
+      (file.mimetype && /spreadsheet|excel|csv|octet-stream/.test(file.mimetype));
+    if (ok) cb(null, true);
+    else cb(new Error('Please upload an Excel (.xlsx, .xls) or CSV file.'));
+  }
+});
 
 function createAdminToken() {
   return crypto.randomBytes(32).toString('hex');
@@ -33,11 +58,31 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+function isValidEmail(email) {
+  if (!email || typeof email !== 'string') return false;
+  const trimmed = email.trim();
+  // Practical validation — rejects empty / obvious junk without being overly strict
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed) && trimmed.length <= 254;
+}
+
+function formatCheckInTime(iso) {
+  if (!iso) return null;
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleString(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    });
+  } catch {
+    return iso;
+  }
+}
+
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
-// Ensure data directory and database exist
 const fs = require('fs');
 const dataDir = path.join(__dirname, 'data');
 if (!fs.existsSync(dataDir)) {
@@ -45,50 +90,149 @@ if (!fs.existsSync(dataDir)) {
 }
 initDatabase();
 
-// Guest-facing: find table by exact name
-app.post('/find-table', (req, res) => {
+// Public event info (no sensitive data)
+app.get('/api/event', (req, res) => {
+  res.json({ name: EVENT_NAME });
+});
+
+/**
+ * Name autocomplete for check-in (min 4 characters).
+ * Matches the start of a first or last name. Returns names only.
+ */
+app.get('/api/check-in/suggest', (req, res) => {
   try {
-    const { name } = req.body || {};
-    if (!name || typeof name !== 'string') {
-      return res.json({ error: 'Please enter your name.' });
+    const q = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+    if (q.length < 4) {
+      return res.json({ suggestions: [] });
     }
-    const guest = findGuestByName(name);
-    if (guest) {
-      res.json({
-        id: guest.id,
-        table: guest.table_number,
-        name: guest.name,
-        seated: !!guest.seated
+    const suggestions = suggestGuestsByNamePrefix(q);
+    res.json({ suggestions });
+  } catch (err) {
+    res.status(500).json({ suggestions: [] });
+  }
+});
+
+/**
+ * Guest name lookup — does NOT record attendance yet.
+ * Outcomes: found | already_checked_in | not_found | validation error
+ */
+app.post('/api/check-in', (req, res) => {
+  try {
+    const name = typeof req.body?.name === 'string' ? req.body.name.trim() : '';
+
+    if (!name) {
+      return res.status(400).json({
+        status: 'error',
+        error: 'Please enter your name.'
       });
-    } else {
-      res.json({ error: 'Name not found. Please check your spelling or ask a host.' });
     }
+    if (name.length < 2) {
+      return res.status(400).json({
+        status: 'error',
+        error: 'Please enter your full name.'
+      });
+    }
+
+    const guest = findGuestByName(name);
+    if (!guest) {
+      return res.json({
+        status: 'not_found',
+        message: "We couldn't find your RSVP. Please check that your details are correct or speak to a member of the registration team."
+      });
+    }
+
+    if (guest.checked_in) {
+      return res.json({
+        status: 'already_checked_in',
+        id: guest.id,
+        name: guest.name,
+        firstName: firstNameFrom(guest.name),
+        checkedInAt: guest.checked_in_at,
+        checkedInAtDisplay: formatCheckInTime(guest.checked_in_at),
+        message: 'You\'re already checked in.'
+      });
+    }
+
+    return res.json({
+      status: 'found',
+      id: guest.id,
+      name: guest.name,
+      firstName: firstNameFrom(guest.name),
+      message: 'Please confirm your attendance.'
+    });
   } catch (err) {
-    res.status(500).json({ error: 'Server error. Please try again.' });
+    console.error('Check-in lookup error:', err.message);
+    res.status(500).json({
+      status: 'error',
+      error: 'Something went wrong. Please try again or speak to the registration team.'
+    });
   }
 });
 
-// Mark guest as seated
-app.patch('/api/guests/:id/seat', (req, res) => {
+/**
+ * Confirm attendance — records check-in after guest verifies on the result page.
+ * Requires matching id + name to prevent casual ID guessing.
+ */
+app.post('/api/check-in/confirm', (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    if (!id) return res.status(400).json({ error: 'Invalid guest ID.' });
-    const ok = markGuestSeated(id);
-    if (ok) res.json({ success: true });
-    else res.status(404).json({ error: 'Guest not found.' });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to update.' });
-  }
-});
+    const id = parseInt(req.body?.id, 10);
+    const name = typeof req.body?.name === 'string' ? req.body.name.trim() : '';
 
-// Guest-facing: search (partial match)
-app.get('/api/search', (req, res) => {
-  try {
-    const q = req.query.q || '';
-    const guests = searchGuests(q);
-    res.json({ guests });
+    if (!id || !name) {
+      return res.status(400).json({
+        status: 'error',
+        error: 'Unable to confirm. Please go back and try again.'
+      });
+    }
+
+    const guest = findGuestById(id);
+    if (!guest || guest.name.trim().toLowerCase() !== name.toLowerCase()) {
+      return res.json({
+        status: 'not_found',
+        message: "We couldn't find your RSVP. Please speak to the registration team."
+      });
+    }
+
+    if (guest.checked_in) {
+      return res.json({
+        status: 'already_checked_in',
+        firstName: firstNameFrom(guest.name),
+        checkedInAt: guest.checked_in_at,
+        checkedInAtDisplay: formatCheckInTime(guest.checked_in_at),
+        message: 'You\'re already checked in.'
+      });
+    }
+
+    const result = checkInGuest(guest.id, 'self');
+    if (result.alreadyCheckedIn) {
+      return res.json({
+        status: 'already_checked_in',
+        firstName: firstNameFrom(result.guest.name),
+        checkedInAt: result.guest.checked_in_at,
+        checkedInAtDisplay: formatCheckInTime(result.guest.checked_in_at),
+        message: 'You\'re already checked in.'
+      });
+    }
+    if (!result.ok) {
+      return res.status(500).json({
+        status: 'error',
+        error: 'Unable to complete check-in. Please speak to the registration team.'
+      });
+    }
+
+    return res.json({
+      status: 'checked_in',
+      firstName: firstNameFrom(result.guest.name),
+      checkedInAt: result.guest.checked_in_at,
+      checkedInAtDisplay: formatCheckInTime(result.guest.checked_in_at),
+      message: 'You\'re checked in!'
+    });
   } catch (err) {
-    res.status(500).json({ error: 'Server error.' });
+    console.error('Check-in confirm error:', err.message);
+    res.status(500).json({
+      status: 'error',
+      error: 'Something went wrong. Please try again or speak to the registration team.'
+    });
   }
 });
 
@@ -100,7 +244,7 @@ app.post('/api/admin/login', (req, res) => {
       return res.status(401).json({ error: 'Invalid password.' });
     }
     const token = createAdminToken();
-    const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+    const expires = Date.now() + 24 * 60 * 60 * 1000;
     adminSessions.set(token, expires);
     res.json({ success: true, token });
   } catch (err) {
@@ -114,84 +258,318 @@ app.post('/api/admin/logout', (req, res) => {
   res.json({ success: true });
 });
 
-// Admin: list all guests (protected)
+// Admin: list attendees + live stats
 app.get('/api/guests', requireAdmin, (req, res) => {
   try {
     const guests = getAllGuests();
     const count = getGuestCount();
-    res.json({ guests, count });
+    const stats = getAttendanceStats();
+    res.json({ guests, count, stats });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
   }
 });
 
-// Admin: set guest seated status (protected, requires password confirm)
+app.get('/api/admin/stats', requireAdmin, (req, res) => {
+  try {
+    res.json(getAttendanceStats());
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+// Admin: manual check-in (requires password confirm)
+app.post('/api/admin/check-in/:id', requireAdmin, (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { password } = req.body || {};
+    if (!id) return res.status(400).json({ error: 'Invalid attendee ID.' });
+    if (password !== ADMIN_PASSWORD) {
+      return res.status(401).json({ error: 'Invalid password. Action not confirmed.' });
+    }
+
+    const guest = findGuestById(id);
+    if (!guest) return res.status(404).json({ error: 'Attendee not found.' });
+
+    if (guest.checked_in) {
+      return res.json({
+        status: 'already_checked_in',
+        guest,
+        checkedInAtDisplay: formatCheckInTime(guest.checked_in_at)
+      });
+    }
+
+    const result = checkInGuest(id, 'manual');
+    if (result.alreadyCheckedIn) {
+      return res.json({
+        status: 'already_checked_in',
+        guest: result.guest,
+        checkedInAtDisplay: formatCheckInTime(result.guest.checked_in_at)
+      });
+    }
+    if (!result.ok) {
+      return res.status(500).json({ error: 'Failed to check in attendee.' });
+    }
+
+    res.json({
+      status: 'checked_in',
+      guest: result.guest,
+      checkedInAtDisplay: formatCheckInTime(result.guest.checked_in_at)
+    });
+  } catch (err) {
+    console.error('Admin check-in error:', err.message);
+    res.status(500).json({ error: 'Failed to check in attendee.' });
+  }
+});
+
+// Admin: check out (requires password confirm)
+app.post('/api/admin/check-out/:id', requireAdmin, (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { password } = req.body || {};
+    if (!id) return res.status(400).json({ error: 'Invalid attendee ID.' });
+    if (password !== ADMIN_PASSWORD) {
+      return res.status(401).json({ error: 'Invalid password. Action not confirmed.' });
+    }
+
+    const guest = findGuestById(id);
+    if (!guest) return res.status(404).json({ error: 'Attendee not found.' });
+
+    if (!guest.checked_in) {
+      return res.json({
+        status: 'not_checked_in',
+        guest
+      });
+    }
+
+    const ok = setGuestSeated(id, false);
+    if (!ok) return res.status(500).json({ error: 'Failed to check out attendee.' });
+
+    res.json({
+      status: 'checked_out',
+      guest: findGuestById(id)
+    });
+  } catch (err) {
+    console.error('Admin check-out error:', err.message);
+    res.status(500).json({ error: 'Failed to check out attendee.' });
+  }
+});
+
+// Admin: bulk check-in / check-out / delete (requires password)
+app.post('/api/admin/bulk', requireAdmin, (req, res) => {
+  try {
+    const { password, action, ids } = req.body || {};
+    if (password !== ADMIN_PASSWORD) {
+      return res.status(401).json({ error: 'Invalid password. Action not confirmed.' });
+    }
+    if (!Array.isArray(ids) || !ids.length) {
+      return res.status(400).json({ error: 'Select at least one attendee.' });
+    }
+    const parsedIds = ids
+      .map((id) => parseInt(id, 10))
+      .filter((id) => Number.isInteger(id) && id > 0);
+    if (!parsedIds.length) {
+      return res.status(400).json({ error: 'Select at least one attendee.' });
+    }
+
+    if (action === 'checkin') {
+      const result = bulkCheckIn(parsedIds);
+      return res.json({
+        success: true,
+        action: 'checkin',
+        updated: result.updated,
+        message: `Checked in ${result.updated} attendee${result.updated === 1 ? '' : 's'}.`
+      });
+    }
+    if (action === 'checkout') {
+      const result = bulkCheckOut(parsedIds);
+      return res.json({
+        success: true,
+        action: 'checkout',
+        updated: result.updated,
+        message: `Checked out ${result.updated} attendee${result.updated === 1 ? '' : 's'}.`
+      });
+    }
+    if (action === 'delete') {
+      const result = bulkDeleteGuests(parsedIds);
+      return res.json({
+        success: true,
+        action: 'delete',
+        deleted: result.deleted,
+        message: `Deleted ${result.deleted} attendee${result.deleted === 1 ? '' : 's'}.`
+      });
+    }
+    return res.status(400).json({ error: 'Unknown bulk action.' });
+  } catch (err) {
+    console.error('Bulk action error:', err.message);
+    res.status(500).json({ error: 'Bulk action failed.' });
+  }
+});
+
+// Admin: set / clear attendance (password confirm)
 app.patch('/api/guests/:id/seated', requireAdmin, (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
     const { password, seated } = req.body || {};
-    if (!id) return res.status(400).json({ error: 'Invalid guest ID.' });
+    if (!id) return res.status(400).json({ error: 'Invalid attendee ID.' });
     if (password !== ADMIN_PASSWORD) {
       return res.status(401).json({ error: 'Invalid password. Action not confirmed.' });
     }
-    const ok = setGuestSeated(id, !!seated);
+    if (seated) {
+      const result = checkInGuest(id, 'manual');
+      if (result.ok || result.alreadyCheckedIn) {
+        return res.json({ success: true, guest: result.guest });
+      }
+      return res.status(404).json({ error: 'Attendee not found.' });
+    }
+    const ok = setGuestSeated(id, false);
     if (ok) res.json({ success: true });
-    else res.status(404).json({ error: 'Guest not found.' });
+    else res.status(404).json({ error: 'Attendee not found.' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to update.' });
   }
 });
 
-// Admin: update guest table (protected, requires password confirm)
-app.patch('/api/guests/:id/table', requireAdmin, (req, res) => {
+// Admin: update attendee name/email
+app.patch('/api/guests/:id', requireAdmin, (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
-    const { password, table_number } = req.body || {};
-    if (!id) return res.status(400).json({ error: 'Invalid guest ID.' });
-    if (!table_number) return res.status(400).json({ error: 'New table number is required.' });
+    const { password, name, email } = req.body || {};
+    if (!id) return res.status(400).json({ error: 'Invalid attendee ID.' });
     if (password !== ADMIN_PASSWORD) {
       return res.status(401).json({ error: 'Invalid password. Action not confirmed.' });
     }
-    const ok = updateGuestTable(id, table_number);
-    if (ok) res.json({ success: true });
-    else res.status(404).json({ error: 'Guest not found.' });
+    if (email != null && email !== '' && !isValidEmail(email)) {
+      return res.status(400).json({ error: 'Please enter a valid email address.' });
+    }
+    try {
+      const ok = updateGuest(id, { name, email });
+      if (ok) res.json({ success: true, guest: findGuestById(id) });
+      else res.status(404).json({ error: 'Attendee not found.' });
+    } catch (e) {
+      if (e.message === 'EMAIL_TAKEN') {
+        return res.status(409).json({ error: 'That email is already on the RSVP list.' });
+      }
+      throw e;
+    }
   } catch (err) {
-    res.status(500).json({ error: 'Failed to update table.' });
+    res.status(500).json({ error: 'Failed to update attendee.' });
   }
 });
 
-// Admin: delete guest (protected, requires password confirm)
+// Admin: delete attendee
 app.delete('/api/guests/:id', requireAdmin, (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
     const { password } = req.body || {};
-    if (!id) return res.status(400).json({ error: 'Invalid guest ID.' });
+    if (!id) return res.status(400).json({ error: 'Invalid attendee ID.' });
     if (password !== ADMIN_PASSWORD) {
       return res.status(401).json({ error: 'Invalid password. Action not confirmed.' });
     }
     const ok = deleteGuest(id);
     if (ok) res.json({ success: true });
-    else res.status(404).json({ error: 'Guest not found.' });
+    else res.status(404).json({ error: 'Attendee not found.' });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to delete guest.' });
+    res.status(500).json({ error: 'Failed to delete attendee.' });
   }
 });
 
-// Admin: add guest (protected)
+// Admin: add attendee to RSVP list (email optional — check-in is by name)
 app.post('/api/guests', requireAdmin, (req, res) => {
   try {
-    const { name, table_number } = req.body || {};
-    if (!name || typeof name !== 'string') {
+    const { name, email } = req.body || {};
+    if (!name || typeof name !== 'string' || !name.trim()) {
       return res.status(400).json({ error: 'Name is required.' });
     }
-    const guest = addGuest(name, table_number);
-    res.status(201).json(guest);
+    if (email && !isValidEmail(email)) {
+      return res.status(400).json({ error: 'Please enter a valid email address.' });
+    }
+    try {
+      const guest = addGuest(name, 0, email || null);
+      res.status(201).json(guest);
+    } catch (e) {
+      if (e.message === 'EMAIL_TAKEN') {
+        return res.status(409).json({ error: 'That email is already on the RSVP list.' });
+      }
+      throw e;
+    }
   } catch (err) {
-    res.status(500).json({ error: 'Failed to add guest.' });
+    res.status(500).json({ error: 'Failed to add attendee.' });
   }
+});
+
+/**
+ * Parse spreadsheet rows into { name, email? } entries.
+ * Looks for Name / Full Name / Guest / Attendee columns; otherwise uses the first column.
+ */
+function extractGuestsFromSheet(workbook) {
+  const sheetName = workbook.SheetNames[0];
+  if (!sheetName) return [];
+  const sheet = workbook.Sheets[sheetName];
+  const rows = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: false });
+  if (!rows.length) {
+    // Fallback: treat as a single-column list with no header
+    const matrix = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: false });
+    return matrix
+      .map((r) => ({ name: String(r[0] || '').trim() }))
+      .filter((r) => r.name && !/^name$/i.test(r.name));
+  }
+
+  const keys = Object.keys(rows[0] || {});
+  const findKey = (...candidates) =>
+    keys.find((k) => candidates.some((c) => k.trim().toLowerCase() === c));
+
+  const nameKey =
+    findKey('name', 'full name', 'fullname name', 'guest', 'attendee', 'full_name') ||
+    keys[0];
+  const emailKey = findKey('email', 'email address', 'e-mail', 'mail');
+
+  return rows
+    .map((row) => ({
+      name: String(row[nameKey] || '').trim(),
+      email: emailKey ? String(row[emailKey] || '').trim() : ''
+    }))
+    .filter((r) => r.name);
+}
+
+// Admin: import guests from Excel / CSV
+app.post('/api/guests/import', requireAdmin, (req, res) => {
+  upload.single('file')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message || 'Upload failed.' });
+    }
+    try {
+      if (!req.file || !req.file.buffer) {
+        return res.status(400).json({ error: 'Please choose an Excel or CSV file.' });
+      }
+
+      const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+      const entries = extractGuestsFromSheet(workbook);
+      if (!entries.length) {
+        return res.status(400).json({
+          error: 'No guest names found. Use a column headed “Name”, or put one name per row.'
+        });
+      }
+
+      const result = importGuests(entries);
+      res.json({
+        success: true,
+        imported: result.imported,
+        skipped: result.skipped,
+        total: entries.length,
+        message: `Imported ${result.imported} guest${result.imported === 1 ? '' : 's'}` +
+          (result.skipped ? ` (${result.skipped} skipped — blank or already on the list).` : '.')
+      });
+    } catch (e) {
+      console.error('Import error:', e.message);
+      res.status(500).json({ error: 'Could not read that spreadsheet. Please try again.' });
+    }
+  });
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Table Finder running at http://localhost:${PORT}`);
+  console.log(`${EVENT_NAME} running at http://localhost:${PORT}`);
+  console.log(`Guest check-in: http://localhost:${PORT}/`);
+  console.log(`Admin:          http://localhost:${PORT}/admin.html`);
 });

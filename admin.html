@@ -2,163 +2,348 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script>try{if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Admin | Table Finder</title>
+  <title>Admin | 2026 Africa Leadership Summit</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Outfit:wght@300;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --ink: #1a1512;
-      --cream: #f9f6f2;
-      --gold: #b8860b;
-      --gold-dim: #8b6914;
-      --shadow: rgba(26, 21, 18, 0.08);
+      --navy: #00228a;
+      --navy-deep: #001a6b;
+      --navy-soft: #1a3aad;
+      --sky: #9ec8e8;
+      --ice: #e8f3fb;
+      --ink: #0c1a3a;
+      --muted: #4a5a78;
+      --shadow: rgba(0, 34, 138, 0.12);
+      --success: #1b7a3d;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Outfit', sans-serif;
-      background: var(--cream);
+      font-family: 'Source Sans 3', sans-serif;
+      background: #fff;
       min-height: 100vh;
       padding: 2rem;
       color: var(--ink);
     }
-    .wrap { max-width: 800px; margin: 0 auto; }
+    .wrap { max-width: 960px; margin: 0 auto; }
+    .admin-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .admin-header img {
+      height: 52px;
+      width: auto;
+      background: #fff;
+      border-radius: 10px;
+      padding: 0.35rem 0.55rem;
+      box-shadow: 0 4px 16px var(--shadow);
+    }
+    .admin-header .titles { flex: 1; min-width: 180px; }
+    .admin-header .brand-line {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--navy);
+      margin-bottom: 0.15rem;
+    }
     h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.75rem;
-      margin-bottom: 1.5rem;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--navy-deep);
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+      margin-bottom: 0;
     }
     .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
       background: #fff;
-      padding: 1rem 1.5rem;
-      border-radius: 10px;
+      padding: 1rem 1.15rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px var(--shadow);
+      border-top: 3px solid var(--navy);
+    }
+    .stat-card .label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+    }
+    .stat-card .value {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--navy-deep);
+    }
+    .stat-card.checked .value { color: var(--success); }
+    .qr-card, .add-form {
+      background: #fff;
+      padding: 1.25rem 1.5rem;
+      border-radius: 12px;
       box-shadow: 0 4px 20px var(--shadow);
       margin-bottom: 1.5rem;
-      font-size: 0.95rem;
+    }
+    .qr-card {
+      display: flex;
+      gap: 1.25rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .qr-card img#qrImage {
+      width: 140px;
+      height: 140px;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid #dce6f5;
+    }
+    .qr-card .qr-info { flex: 1; min-width: 200px; }
+    .qr-card h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--navy-deep);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .qr-card p { font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem; }
+    .qr-url {
+      font-family: monospace;
+      font-size: 0.85rem;
+      word-break: break-all;
+      background: var(--ice);
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      color: var(--navy);
     }
     .add-form {
-      background: #fff;
-      padding: 1.5rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 20px var(--shadow);
-      margin-bottom: 1.5rem;
       display: flex;
       gap: 0.75rem;
       flex-wrap: wrap;
       align-items: flex-end;
     }
+    .import-row {
+      background: #fff;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px var(--shadow);
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .import-row .import-hint {
+      flex: 1;
+      min-width: 200px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .import-row .import-hint strong {
+      color: var(--navy-deep);
+      display: block;
+      margin-bottom: 0.15rem;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .btn-secondary {
+      background: #fff !important;
+      color: var(--navy) !important;
+      border: 1.5px solid var(--navy) !important;
+    }
+    .btn-secondary:hover {
+      background: var(--ice) !important;
+      filter: none !important;
+    }
+    #importStatus {
+      width: 100%;
+      font-size: 0.9rem;
+      margin-top: 0.25rem;
+      display: none;
+    }
+    #importStatus.visible { display: block; }
+    #importStatus.ok { color: var(--success); }
+    #importStatus.err { color: #b42318; }
     .field {
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
+      flex: 1;
+      min-width: 160px;
     }
-    .field label { font-size: 0.85rem; color: #666; }
+    .field label { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
     .field input {
       padding: 0.6rem 0.8rem;
-      border: 1px solid #ddd;
+      border: 1.5px solid #c5d4ea;
       border-radius: 8px;
       font-family: inherit;
-      min-width: 160px;
+      background: #fff;
+    }
+    .field input:focus {
+      outline: none;
+      border-color: var(--navy);
+      box-shadow: 0 0 0 3px rgba(0, 34, 138, 0.15);
     }
     button {
       padding: 0.6rem 1.2rem;
-      background: var(--gold);
+      background: linear-gradient(180deg, var(--navy-soft), var(--navy));
       color: #fff;
       border: none;
       border-radius: 8px;
-      font-family: inherit;
-      font-weight: 500;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
       cursor: pointer;
     }
-    button:hover { background: var(--gold-dim); }
-    .search-bar {
+    button:hover { filter: brightness(1.06); }
+    button:disabled { background: #9aa8c4; cursor: not-allowed; filter: none; }
+    .toolbar {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
       margin-bottom: 1rem;
+      align-items: center;
     }
+    .search-bar { flex: 1; min-width: 200px; }
     .search-bar input {
       width: 100%;
       padding: 0.7rem 1rem;
-      border: 1px solid #ddd;
+      border: 1.5px solid #c5d4ea;
       border-radius: 8px;
       font-family: inherit;
     }
-    .search-bar input::placeholder {
-      color: #999;
-    }
-    .table-tabs {
+    .filter-tabs {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
-      margin-bottom: 1rem;
     }
-    .table-tabs button {
+    .filter-tabs button {
       padding: 0.5rem 0.9rem;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       background: #fff;
       color: var(--ink);
-      border: 1px solid #ddd;
+      border: 1px solid #c5d4ea;
     }
-    .table-tabs button:hover {
-      border-color: var(--gold);
-      color: var(--gold-dim);
+    .filter-tabs button:hover {
+      border-color: var(--navy);
+      color: var(--navy);
     }
-    .table-tabs button.active {
-      background: var(--gold);
+    .filter-tabs button.active {
+      background: var(--navy);
       color: #fff;
-      border-color: var(--gold);
+      border-color: var(--navy);
     }
+    .bulk-bar {
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      background: var(--ice);
+      border: 1px solid #c5d4ea;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+    }
+    .bulk-bar.visible { display: flex; }
+    .bulk-bar .bulk-count {
+      font-weight: 600;
+      color: var(--navy-deep);
+      margin-right: auto;
+    }
+    .bulk-bar button {
+      font-size: 0.85rem;
+      padding: 0.45rem 0.85rem;
+    }
+    .check-col {
+      width: 42px;
+      text-align: center;
+    }
+    .check-col input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--navy);
+    }
+    tr.selected-row { background: #eaf1ff; }
+    tr.checked-in.selected-row { background: #dceefd; }
     .list {
       background: #fff;
-      border-radius: 10px;
+      border-radius: 12px;
       box-shadow: 0 4px 20px var(--shadow);
       overflow: hidden;
+      overflow-x: auto;
     }
     table {
       width: 100%;
       border-collapse: collapse;
+      min-width: 640px;
     }
     th, td {
       text-align: left;
       padding: 0.75rem 1rem;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid #e8eef8;
+      font-size: 0.92rem;
     }
     th {
-      background: #f8f8f8;
-      font-weight: 500;
-      font-size: 0.9rem;
+      background: var(--ice);
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: var(--navy-deep);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
     tr:last-child td { border-bottom: none; }
-    .seated-cell { text-align: center; width: 80px; }
-    .seated-cell input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
+    tr.checked-in { background: #f0faf3; }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
     }
-    .seated-cell input[type="checkbox"]:checked {
-      accent-color: #2e7d32;
+    .badge.yes {
+      background: #e6f6ec;
+      color: var(--success);
     }
-    .actions-cell {
-      white-space: nowrap;
-      text-align: right;
+    .badge.no {
+      background: #eef2f8;
+      color: #6a7a94;
     }
+    .actions-cell { white-space: nowrap; text-align: right; }
     .action-btn {
       padding: 0.3rem 0.6rem;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       border-radius: 6px;
       margin-left: 0.25rem;
     }
-    .action-btn.danger {
-      background: #c0392b;
+    .action-btn.danger { background: #b42318; }
+    .action-btn.secondary {
+      background: #fff;
+      color: var(--navy);
+      border: 1px solid #c5d4ea;
     }
     .back { margin-bottom: 1rem; }
     .back a {
-      color: var(--gold);
+      color: var(--navy);
       text-decoration: none;
       font-size: 0.95rem;
+      font-weight: 600;
     }
     .back a:hover { text-decoration: underline; }
     .login-card {
-      max-width: 360px;
+      max-width: 380px;
       margin: 4rem auto;
       padding: 2rem;
       background: #fff;
@@ -166,20 +351,29 @@
       box-shadow: 0 12px 48px var(--shadow);
       text-align: center;
     }
-    .login-card h1 { margin-bottom: 1rem; }
+    .login-card .login-logo {
+      width: min(240px, 80%);
+      height: auto;
+      margin: 0 auto 1.25rem;
+      display: block;
+    }
+    .login-card h1 {
+      margin-bottom: 0.5rem;
+      font-size: 1.25rem;
+    }
     .login-card input[type="password"] {
       width: 100%;
       padding: 0.75rem 1rem;
       margin-bottom: 1rem;
-      border: 1px solid #ddd;
+      border: 1.5px solid #c5d4ea;
       border-radius: 8px;
     }
-    .login-error { color: #c0392b; font-size: 0.9rem; margin-bottom: 1rem; }
+    .login-error { color: #b42318; font-size: 0.9rem; margin-bottom: 1rem; }
     .logout { float: right; font-size: 0.9rem; }
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.4);
+      background: rgba(0, 26, 107, 0.45);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -191,90 +385,221 @@
       padding: 1.5rem;
       border-radius: 12px;
       box-shadow: 0 12px 48px rgba(0,0,0,0.2);
-      max-width: 360px;
+      max-width: 400px;
       width: 90%;
     }
-    .modal h3 { margin-bottom: 0.75rem; font-size: 1.1rem; }
-    .modal p { color: #666; font-size: 0.95rem; margin-bottom: 1rem; }
-    .modal input { width: 100%; padding: 0.7rem; margin-bottom: 1rem; }
+    .modal h3 {
+      margin-bottom: 0.75rem;
+      font-size: 1.05rem;
+      font-family: 'Montserrat', sans-serif;
+      color: var(--navy-deep);
+    }
+    .modal p { color: var(--muted); font-size: 0.95rem; margin-bottom: 1rem; }
+    .modal input {
+      width: 100%;
+      padding: 0.7rem;
+      margin-bottom: 0.75rem;
+      border: 1.5px solid #c5d4ea;
+      border-radius: 8px;
+      font-family: inherit;
+    }
     .modal-buttons { display: flex; gap: 0.5rem; justify-content: flex-end; }
-    .modal-buttons button.secondary { background: #888; }
+    .modal-buttons button.secondary { background: #6a7a94; }
+    .theme-toggle {
+      position: fixed;
+      top: 0.85rem;
+      right: 0.85rem;
+      z-index: 50;
+      width: 42px !important;
+      height: 42px !important;
+      min-height: 42px;
+      padding: 0 !important;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      color: var(--navy) !important;
+      background: #fff !important;
+      border: 1.5px solid #c5d4ea !important;
+      border-radius: 50% !important;
+      box-shadow: 0 4px 16px var(--shadow);
+    }
+    .theme-toggle svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --navy: #8eb4ff;
+      --navy-deep: #d6e4ff;
+      --navy-soft: #4d78e8;
+      --ice: #1c2740;
+      --ink: #e8eef8;
+      --muted: #a8b6d0;
+      --shadow: rgba(0, 0, 0, 0.35);
+      --success: #7dcea0;
+    }
+    html[data-theme="dark"] body { background: #0b1220; }
+    html[data-theme="dark"] .stat-card,
+    html[data-theme="dark"] .qr-card,
+    html[data-theme="dark"] .add-form,
+    html[data-theme="dark"] .import-row,
+    html[data-theme="dark"] .list,
+    html[data-theme="dark"] .login-card,
+    html[data-theme="dark"] .modal,
+    html[data-theme="dark"] .admin-header img {
+      background: #141c2f;
+    }
+    html[data-theme="dark"] th,
+    html[data-theme="dark"] td { border-bottom-color: #24324d; }
+    html[data-theme="dark"] tr.checked-in { background: #143024; }
+    html[data-theme="dark"] tr.selected-row { background: #1a2744; }
+    html[data-theme="dark"] tr.checked-in.selected-row { background: #1a3040; }
+    html[data-theme="dark"] .badge.yes { background: #143024; }
+    html[data-theme="dark"] .badge.no { background: #24324d; color: #c5d0e4; }
+    html[data-theme="dark"] .field input,
+    html[data-theme="dark"] .search-bar input,
+    html[data-theme="dark"] .modal input,
+    html[data-theme="dark"] .login-card input[type="password"] {
+      background: #1c2740;
+      color: var(--ink);
+      border-color: #3a4d73;
+    }
+    html[data-theme="dark"] .filter-tabs button,
+    html[data-theme="dark"] .action-btn.secondary,
+    html[data-theme="dark"] .btn-secondary {
+      background: #1c2740 !important;
+      color: #d6e4ff !important;
+      border-color: #3a4d73 !important;
+    }
+    html[data-theme="dark"] .filter-tabs button.active {
+      background: var(--navy-soft) !important;
+      color: #fff !important;
+      border-color: var(--navy-soft) !important;
+    }
+    html[data-theme="dark"] .qr-card img#qrImage { background: #fff; }
+    html[data-theme="dark"] .qr-card img#qrImage,
+    html[data-theme="dark"] .bulk-bar { border-color: #3a4d73; }
+    html[data-theme="dark"] .theme-toggle {
+      background: #1c2740 !important;
+      color: #d6e4ff !important;
+      border-color: #3a4d73 !important;
+    }
+    html[data-theme="dark"] .login-error,
+    html[data-theme="dark"] #importStatus.err { color: #f5a8a1; }
 
-    @media (max-width: 600px) {
+    @media (max-width: 700px) {
       body { padding: 1rem; }
-      .wrap { max-width: 100%; }
-      h1 { font-size: 1.4rem; }
-      .add-form { flex-direction: column; }
-      .add-form .field { min-width: 100%; }
-      .add-form .field input { min-width: 100%; min-height: 48px; padding: 0.75rem; }
-      .add-form button { width: 100%; min-height: 48px; }
-      .table-tabs button { padding: 0.6rem 0.8rem; min-height: 44px; }
-      .list { border-radius: 8px; overflow-x: auto; }
-      table { min-width: 320px; }
-      th, td { padding: 0.6rem 0.75rem; font-size: 0.9rem; }
-      .seated-cell input[type="checkbox"] { width: 22px; height: 22px; }
-      .back { margin-bottom: 0.75rem; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
       .logout { float: none; display: block; margin-top: 0.5rem; }
-      .modal { margin: 1rem; width: calc(100% - 2rem); max-width: none; }
-      .modal input { min-height: 48px; padding: 0.85rem; font-size: 16px; }
+      .add-form { flex-direction: column; }
+      .add-form button { width: 100%; min-height: 48px; }
+      .field input { min-height: 48px; }
+      .modal { width: calc(100% - 2rem); max-width: none; }
       .modal-buttons { flex-direction: column; }
       .modal-buttons button { width: 100%; min-height: 48px; }
+      .admin-header img { height: 44px; }
+      h1 { font-size: 1.15rem; }
     }
   </style>
 </head>
 <body>
+  <button type="button" id="themeToggle" class="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false"></button>
   <div id="loginScreen" class="login-card" style="display: none;">
+    <img class="login-logo" src="assets/logo.jpeg" alt="New Day Global Network">
     <h1>Admin access</h1>
-    <p style="color: #666; margin-bottom: 1.5rem; font-size: 0.95rem;">Enter the admin password</p>
+    <p style="color: var(--muted); margin-bottom: 1.5rem; font-size: 0.95rem;">2026 Africa Leadership Summit</p>
     <p id="loginError" class="login-error" style="display: none;"></p>
-    <input id="adminPassword" type="password" placeholder="Password" autocomplete="current-password">
+    <input id="adminPassword" type="password" placeholder="Password" autocomplete="current-password"
+      onkeydown="if(event.key==='Enter')doLogin()">
     <button onclick="doLogin()" style="width: 100%;">Log in</button>
-    <p class="back" style="margin-top: 1.5rem;"><a href="index.html">← Back to guest finder</a></p>
+    <p class="back" style="margin-top: 1.5rem;"><a href="index.html">← Back to check-in</a></p>
   </div>
 
   <div id="adminContent" class="wrap" style="display: none;">
-    <p class="back"><a href="index.html">← Back to guest finder</a> <span class="logout"><button onclick="doLogout()" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Log out</button></span></p>
-    <h1>Manage Guests</h1>
-    <div class="stats" id="stats">Loading…</div>
+    <p class="back">
+      <a href="index.html">← Back to check-in</a>
+      <span class="logout"><button onclick="doLogout()" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Log out</button></span>
+    </p>
+    <div class="admin-header">
+      <img src="assets/logo.jpeg" alt="New Day Global Network">
+      <div class="titles">
+        <p class="brand-line">New Day Global Network</p>
+        <h1>Attendance Dashboard</h1>
+      </div>
+    </div>
+
+    <div class="stats" id="stats">
+      <div class="stat-card"><div class="label">RSVP'd</div><div class="value" id="statRsvp">—</div></div>
+      <div class="stat-card checked"><div class="label">Checked in</div><div class="value" id="statChecked">—</div></div>
+      <div class="stat-card"><div class="label">Remaining</div><div class="value" id="statRemaining">—</div></div>
+      <div class="stat-card"><div class="label">Attendance</div><div class="value" id="statPct">—</div></div>
+    </div>
+
+    <div class="qr-card">
+      <img id="qrImage" alt="Check-in QR code" width="140" height="140">
+      <div class="qr-info">
+        <h2>Conference check-in QR code</h2>
+        <p>Display this QR at the entrance. Guests scan it to open the public check-in page.</p>
+        <div class="qr-url" id="checkInUrl"></div>
+      </div>
+    </div>
 
     <div class="add-form">
       <div class="field">
         <label>Name</label>
         <input id="newName" placeholder="Full name" type="text">
       </div>
-      <div class="field">
-        <label>Table</label>
-        <input id="newTable" type="number" min="1" max="99" value="1" placeholder="1">
+      <button onclick="addAttendee()">Add to RSVP</button>
+    </div>
+
+    <div class="import-row">
+      <div class="import-hint">
+        <strong>Import from spreadsheet</strong>
+        Excel (.xlsx / .xls) or CSV with a Name column — one guest per row.
       </div>
-      <button onclick="addGuest()">Add Guest</button>
+      <input id="importFile" type="file" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" hidden>
+      <button type="button" class="btn-secondary" id="importBtn" onclick="document.getElementById('importFile').click()">
+        Import Excel spreadsheet
+      </button>
+      <p id="importStatus"></p>
     </div>
 
-    <div class="search-bar">
-      <input id="searchGuests" type="text" placeholder="Search guests by name…">
+    <div class="toolbar">
+      <div class="search-bar">
+        <input id="searchGuests" type="text" placeholder="Search by name…">
+      </div>
+      <div class="filter-tabs" id="filterTabs">
+        <button type="button" class="active" data-filter="all">All</button>
+        <button type="button" data-filter="checked">Checked in</button>
+        <button type="button" data-filter="not_checked">Not checked in</button>
+      </div>
     </div>
 
-    <div class="table-tabs" id="tableTabs">
-      <button type="button" class="active" data-table="0">All</button>
-      <button type="button" data-table="1">Table 1</button>
-      <button type="button" data-table="2">Table 2</button>
-      <button type="button" data-table="3">Table 3</button>
-      <button type="button" data-table="4">Table 4</button>
-      <button type="button" data-table="5">Table 5</button>
-      <button type="button" data-table="6">Table 6</button>
-      <button type="button" data-table="7">Table 7</button>
-      <button type="button" data-table="8">Table 8</button>
-      <button type="button" data-table="9">Table 9</button>
-      <button type="button" data-table="10">Table 10</button>
+    <div id="bulkBar" class="bulk-bar">
+      <span class="bulk-count" id="bulkCount">0 selected</span>
+      <button type="button" onclick="openBulkConfirm('checkin')">Check in selected</button>
+      <button type="button" class="btn-secondary" onclick="openBulkConfirm('checkout')">Check out selected</button>
+      <button type="button" class="action-btn danger" onclick="openBulkConfirm('delete')" style="margin:0;">Delete selected</button>
+      <button type="button" class="btn-secondary" onclick="clearSelection()">Clear</button>
     </div>
 
     <div class="list">
       <table>
         <thead>
           <tr>
-            <th>#</th>
+            <th class="check-col">
+              <input type="checkbox" id="selectAll" title="Select all visible" aria-label="Select all visible">
+            </th>
             <th>Name</th>
-            <th>Table</th>
-            <th class="seated-cell">Seated</th>
+            <th>RSVP</th>
+            <th>Attendance</th>
+            <th>Check-in time</th>
+            <th>Method</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -285,24 +610,26 @@
 
   <div id="confirmModal" class="modal-overlay hidden">
     <div class="modal">
-      <h3 id="confirmModalTitle">Confirm attendance change</h3>
+      <h3 id="confirmModalTitle">Confirm</h3>
       <p id="confirmModalMsg">Enter admin password to confirm:</p>
-      <input id="confirmPassword" type="password" placeholder="Admin password" onkeydown="if(event.key==='Enter')submitAttendanceChange();if(event.key==='Escape')closeConfirmModal();">
-      <p id="confirmModalError" class="login-error" style="display: none; margin-top: -0.5rem;"></p>
+      <input id="confirmPassword" type="password" placeholder="Admin password"
+        onkeydown="if(event.key==='Enter')submitConfirmAction();if(event.key==='Escape')closeConfirmModal();">
+      <p id="confirmModalError" class="login-error" style="display: none; margin-top: -0.25rem;"></p>
       <div class="modal-buttons">
         <button type="button" class="secondary" onclick="closeConfirmModal()">Cancel</button>
-        <button type="button" onclick="submitAttendanceChange()">Confirm</button>
+        <button type="button" onclick="submitConfirmAction()">Confirm</button>
       </div>
     </div>
   </div>
 
   <div id="editModal" class="modal-overlay hidden">
     <div class="modal">
-      <h3>Edit guest table</h3>
-      <p>Change table for <strong id="editGuestName"></strong>.</p>
-      <input id="editTableNumber" type="number" min="1" max="99" placeholder="New table number">
-      <input id="editPassword" type="password" placeholder="Admin password" onkeydown="if(event.key==='Enter')submitEditGuest();if(event.key==='Escape')closeEditModal();">
-      <p id="editError" class="login-error" style="display: none; margin-top: -0.5rem;"></p>
+      <h3>Edit attendee</h3>
+      <p>Update the name for this RSVP record.</p>
+      <input id="editName" type="text" placeholder="Full name">
+      <input id="editPassword" type="password" placeholder="Admin password"
+        onkeydown="if(event.key==='Enter')submitEditGuest();if(event.key==='Escape')closeEditModal();">
+      <p id="editError" class="login-error" style="display: none;"></p>
       <div class="modal-buttons">
         <button type="button" class="secondary" onclick="closeEditModal()">Cancel</button>
         <button type="button" onclick="submitEditGuest()">Save</button>
@@ -312,10 +639,11 @@
 
   <div id="deleteModal" class="modal-overlay hidden">
     <div class="modal">
-      <h3>Delete guest</h3>
-      <p>Are you sure you want to remove <strong id="deleteGuestName"></strong> from the guest list?</p>
-      <input id="deletePassword" type="password" placeholder="Admin password" onkeydown="if(event.key==='Enter')submitDeleteGuest();if(event.key==='Escape')closeDeleteModal();">
-      <p id="deleteError" class="login-error" style="display: none; margin-top: -0.5rem;"></p>
+      <h3>Delete attendee</h3>
+      <p>Remove <strong id="deleteGuestName"></strong> from the RSVP list?</p>
+      <input id="deletePassword" type="password" placeholder="Admin password"
+        onkeydown="if(event.key==='Enter')submitDeleteGuest();if(event.key==='Escape')closeDeleteModal();">
+      <p id="deleteError" class="login-error" style="display: none;"></p>
       <div class="modal-buttons">
         <button type="button" class="secondary" onclick="closeDeleteModal()">Cancel</button>
         <button type="button" onclick="submitDeleteGuest()">Delete</button>
@@ -323,17 +651,64 @@
     </div>
   </div>
 
+  <script src="theme.js"></script>
   <script>
     const ADMIN_TOKEN_KEY = 'admin_token';
     let allGuests = [];
-    let selectedTable = 0;
-    let pendingChange = null; // { guestId, guestName, newSeated }
-    let pendingEdit = null;   // { guestId, guestName, table }
-    let pendingDelete = null; // { guestId, guestName }
+    let attendanceFilter = 'all';
+    let pendingConfirm = null;
+    let pendingEdit = null;
+    let pendingDelete = null;
+    let selectedIds = new Set();
+    let visibleIds = [];
 
     function getAuthHeaders() {
       const token = sessionStorage.getItem(ADMIN_TOKEN_KEY);
       return token ? { 'X-Admin-Token': token } : {};
+    }
+
+    function updateBulkBar() {
+      const bar = document.getElementById('bulkBar');
+      const count = selectedIds.size;
+      document.getElementById('bulkCount').textContent =
+        count + ' selected';
+      bar.classList.toggle('visible', count > 0);
+
+      const selectAll = document.getElementById('selectAll');
+      if (selectAll) {
+        if (!visibleIds.length) {
+          selectAll.checked = false;
+          selectAll.indeterminate = false;
+        } else {
+          const selectedVisible = visibleIds.filter((id) => selectedIds.has(id)).length;
+          selectAll.checked = selectedVisible === visibleIds.length;
+          selectAll.indeterminate = selectedVisible > 0 && selectedVisible < visibleIds.length;
+        }
+      }
+    }
+
+    function clearSelection() {
+      selectedIds.clear();
+      updateBulkBar();
+      renderGuestList();
+    }
+
+    function openBulkConfirm(type) {
+      const ids = Array.from(selectedIds);
+      if (!ids.length) return;
+      const labels = {
+        checkin: 'Check in selected',
+        checkout: 'Check out selected',
+        delete: 'Delete selected'
+      };
+      pendingConfirm = { type: 'bulk-' + type, ids };
+      document.getElementById('confirmModalTitle').textContent = labels[type] || 'Confirm';
+      document.getElementById('confirmModalMsg').textContent =
+        `Enter admin password to ${type === 'delete' ? 'delete' : type === 'checkout' ? 'check out' : 'check in'} ${ids.length} attendee${ids.length === 1 ? '' : 's'}:`;
+      document.getElementById('confirmPassword').value = '';
+      document.getElementById('confirmModalError').style.display = 'none';
+      document.getElementById('confirmModal').classList.remove('hidden');
+      document.getElementById('confirmPassword').focus();
     }
 
     function showLogin() {
@@ -344,7 +719,15 @@
     function showAdmin() {
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('adminContent').style.display = 'block';
+      setupQr();
       loadGuests();
+    }
+
+    function setupQr() {
+      const url = window.location.origin + '/';
+      document.getElementById('checkInUrl').textContent = url;
+      document.getElementById('qrImage').src =
+        'https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=' + encodeURIComponent(url);
     }
 
     async function doLogin() {
@@ -378,13 +761,31 @@
 
     async function doLogout() {
       try {
-        await fetch('/api/admin/logout', {
-          method: 'POST',
-          headers: getAuthHeaders()
-        });
+        await fetch('/api/admin/logout', { method: 'POST', headers: getAuthHeaders() });
       } catch (_) {}
       sessionStorage.removeItem(ADMIN_TOKEN_KEY);
       showLogin();
+    }
+
+    function formatTime(iso) {
+      if (!iso) return '—';
+      try {
+        return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+      } catch {
+        return iso;
+      }
+    }
+
+    function methodLabel(method) {
+      if (method === 'manual') return 'Manual';
+      if (method === 'self') return 'QR / self';
+      return '—';
+    }
+
+    function escapeHtml(s) {
+      const div = document.createElement('div');
+      div.textContent = s == null ? '' : String(s);
+      return div.innerHTML;
     }
 
     async function loadGuests() {
@@ -394,151 +795,169 @@
           showLogin();
           return;
         }
-        const { guests, count } = await res.json();
-        allGuests = guests;
+        const data = await res.json();
+        allGuests = data.guests || [];
+        renderStats(data.stats);
         renderGuestList();
       } catch (e) {
-        document.getElementById('stats').textContent = 'Could not load guests.';
+        document.getElementById('statRsvp').textContent = '—';
         showLogin();
       }
     }
 
-    function escapeHtml(s) {
-      const div = document.createElement('div');
-      div.textContent = s;
-      return div.innerHTML;
+    function renderStats(stats) {
+      if (!stats) {
+        const rsvp = allGuests.length;
+        const checked = allGuests.filter((g) => g.checked_in).length;
+        stats = {
+          rsvp,
+          checkedIn: checked,
+          remaining: rsvp - checked,
+          attendance: rsvp ? Math.round((checked / rsvp) * 1000) / 10 : 0
+        };
+      }
+      document.getElementById('statRsvp').textContent = stats.rsvp;
+      document.getElementById('statChecked').textContent = stats.checkedIn;
+      document.getElementById('statRemaining').textContent = stats.remaining;
+      document.getElementById('statPct').textContent = stats.attendance + '%';
+    }
+
+    function getFilteredGuests() {
+      const q = (document.getElementById('searchGuests')?.value || '').trim().toLowerCase();
+      let filtered = allGuests.slice();
+
+      if (attendanceFilter === 'checked') {
+        filtered = filtered.filter((g) => g.checked_in);
+      } else if (attendanceFilter === 'not_checked') {
+        filtered = filtered.filter((g) => !g.checked_in);
+      }
+
+      if (q) {
+        filtered = filtered.filter((g) =>
+          (g.name || '').toLowerCase().includes(q)
+        );
+      }
+      return filtered;
     }
 
     function renderGuestList() {
-      const q = (document.getElementById('searchGuests')?.value || '').trim().toLowerCase();
-      let filtered = selectedTable ? allGuests.filter(g => g.table_number === selectedTable) : allGuests;
-      if (q) filtered = filtered.filter(g => g.name.toLowerCase().includes(q));
-      const seatedCount = allGuests.filter(g => g.seated).length;
-      const notSeatedCount = allGuests.length - seatedCount;
-      document.getElementById('stats').innerHTML = `${allGuests.length} guest${allGuests.length !== 1 ? 's' : ''} in database &middot; <span style="color:#2e7d32">${seatedCount} seated</span> &middot; ${notSeatedCount} not seated${q ? ` &middot; <em>${filtered.length} match${filtered.length !== 1 ? 'es' : ''}</em>` : ''}`;
+      const filtered = getFilteredGuests();
+      visibleIds = filtered.map((g) => g.id);
+
+      // Drop selections that no longer exist
+      const existing = new Set(allGuests.map((g) => g.id));
+      selectedIds = new Set([...selectedIds].filter((id) => existing.has(id)));
+
       const tbody = document.getElementById('guestList');
-      tbody.innerHTML = filtered.map((g, i) => `
-        <tr>
-          <td>${i + 1}</td>
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="color:#888;text-align:center;">No attendees match.</td></tr>';
+        updateBulkBar();
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((g) => {
+        const selected = selectedIds.has(g.id);
+        return `
+        <tr class="${g.checked_in ? 'checked-in' : ''} ${selected ? 'selected-row' : ''}">
+          <td class="check-col">
+            <input type="checkbox" class="row-check" data-id="${g.id}" ${selected ? 'checked' : ''} aria-label="Select ${escapeHtml(g.name)}">
+          </td>
           <td>${escapeHtml(g.name)}</td>
-          <td>Table ${g.table_number}</td>
-          <td class="seated-cell"><input type="checkbox" ${g.seated ? 'checked' : ''} data-id="${g.id}" title="${g.seated ? 'Click to unmark seated' : 'Click to mark seated'}"></td>
+          <td><span class="badge yes">Confirmed</span></td>
+          <td>
+            <span class="badge ${g.checked_in ? 'yes' : 'no'}">
+              ${g.checked_in ? 'Checked in' : 'Not checked in'}
+            </span>
+          </td>
+          <td>${escapeHtml(formatTime(g.checked_in_at))}</td>
+          <td>${escapeHtml(methodLabel(g.check_in_method))}</td>
           <td class="actions-cell">
-            <button type="button" class="action-btn" data-action="edit" data-id="${g.id}">Edit table</button>
+            ${g.checked_in
+              ? `<button type="button" class="action-btn secondary" data-action="checkout" data-id="${g.id}">Check out</button>`
+              : `<button type="button" class="action-btn" data-action="checkin" data-id="${g.id}">Check in</button>`}
+            <button type="button" class="action-btn secondary" data-action="edit" data-id="${g.id}">Edit</button>
             <button type="button" class="action-btn danger" data-action="delete" data-id="${g.id}">Delete</button>
           </td>
         </tr>
-      `).join('');
-    }
-
-    document.getElementById('guestList')?.parentElement?.addEventListener('change', (e) => {
-      const cb = e.target.closest('input[type="checkbox"][data-id]');
-      if (!cb) return;
-      const id = parseInt(cb.dataset.id, 10);
-      const guest = allGuests.find(g => g.id === id);
-      const name = guest ? guest.name : '';
-      const newSeated = cb.checked;
-      const wasSeated = guest ? guest.seated : false;
-      if (newSeated === wasSeated) {
-        cb.checked = wasSeated;
-        return;
-      }
-      pendingChange = { guestId: id, guestName: name, newSeated };
-      document.getElementById('confirmModalTitle').textContent = newSeated ? 'Mark as seated?' : 'Unmark seated?';
-      document.getElementById('confirmModalMsg').textContent = `Enter admin password to ${newSeated ? 'mark' : 'unmark'} "${name}" as seated:`;
-      document.getElementById('confirmPassword').value = '';
-      document.getElementById('confirmModalError').style.display = 'none';
-      document.getElementById('confirmModal').classList.remove('hidden');
-      document.getElementById('confirmPassword').focus();
-    });
-
-    function closeConfirmModal() {
-      pendingChange = null;
-      document.getElementById('confirmModal').classList.add('hidden');
-      renderGuestList();
-    }
-
-    async function submitAttendanceChange() {
-      if (!pendingChange) return;
-      const password = document.getElementById('confirmPassword').value;
-      const errEl = document.getElementById('confirmModalError');
-      errEl.style.display = 'none';
-      if (!password) {
-        errEl.textContent = 'Please enter the password.';
-        errEl.style.display = 'block';
-        return;
-      }
-      try {
-        const res = await fetch('/api/guests/' + pendingChange.guestId + '/seated', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-          body: JSON.stringify({ password, seated: pendingChange.newSeated })
-        });
-        const data = await res.json();
-        if (res.status === 401) {
-          errEl.textContent = data.error || 'Invalid password.';
-          errEl.style.display = 'block';
-          return;
-        }
-        if (data.success) {
-          const g = allGuests.find(x => x.id === pendingChange.guestId);
-          if (g) g.seated = pendingChange.newSeated ? 1 : 0;
-          closeConfirmModal();
-        }
-      } catch (e) {
-        errEl.textContent = 'Could not update.';
-        errEl.style.display = 'block';
-      }
-    }
-
-    async function addGuest() {
-      const name = document.getElementById('newName').value?.trim();
-      const table = document.getElementById('newTable').value;
-      if (!name) return;
-      try {
-        const res = await fetch('/api/guests', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-          body: JSON.stringify({ name, table_number: parseInt(table, 10) || 1 })
-        });
-        if (res.status === 401) { showLogin(); return; }
-        const data = await res.json();
-        if (data.name) {
-          document.getElementById('newName').value = '';
-          loadGuests();
-        }
-      } catch (e) {
-        alert('Failed to add guest.');
-      }
+      `;
+      }).join('');
+      updateBulkBar();
     }
 
     document.getElementById('searchGuests')?.addEventListener('input', renderGuestList);
 
-    document.getElementById('tableTabs')?.addEventListener('click', (e) => {
-      const btn = e.target.closest('button');
+    document.getElementById('filterTabs')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-filter]');
       if (!btn) return;
-      selectedTable = parseInt(btn.dataset.table, 10) || 0;
-      document.querySelectorAll('.table-tabs button').forEach(b => b.classList.remove('active'));
+      attendanceFilter = btn.dataset.filter;
+      document.querySelectorAll('#filterTabs button').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       renderGuestList();
     });
-    document.getElementById('guestList')?.parentElement?.addEventListener('click', (e) => {
+
+    document.getElementById('selectAll')?.addEventListener('change', (e) => {
+      const checked = e.target.checked;
+      visibleIds.forEach((id) => {
+        if (checked) selectedIds.add(id);
+        else selectedIds.delete(id);
+      });
+      renderGuestList();
+    });
+
+    document.getElementById('guestList')?.parentElement?.addEventListener('change', (e) => {
+      const cb = e.target.closest('input.row-check');
+      if (!cb) return;
+      const id = parseInt(cb.dataset.id, 10);
+      if (cb.checked) selectedIds.add(id);
+      else selectedIds.delete(id);
+      const row = cb.closest('tr');
+      if (row) row.classList.toggle('selected-row', cb.checked);
+      updateBulkBar();
+    });
+
+    document.getElementById('guestList')?.parentElement?.addEventListener('click', async (e) => {
       const btn = e.target.closest('button[data-action]');
       if (!btn) return;
       const id = parseInt(btn.dataset.id, 10);
-      const guest = allGuests.find(g => g.id === id);
+      const guest = allGuests.find((g) => g.id === id);
       if (!guest) return;
       const action = btn.dataset.action;
+
+      if (action === 'checkin') {
+        pendingConfirm = { type: 'checkin', guestId: id, guestName: guest.name };
+        document.getElementById('confirmModalTitle').textContent = 'Check in attendee?';
+        document.getElementById('confirmModalMsg').textContent =
+          `Enter admin password to check in "${guest.name}":`;
+        document.getElementById('confirmPassword').value = '';
+        document.getElementById('confirmModalError').style.display = 'none';
+        document.getElementById('confirmModal').classList.remove('hidden');
+        document.getElementById('confirmPassword').focus();
+        return;
+      }
+
+      if (action === 'checkout') {
+        pendingConfirm = { type: 'checkout', guestId: id, guestName: guest.name };
+        document.getElementById('confirmModalTitle').textContent = 'Check out attendee?';
+        document.getElementById('confirmModalMsg').textContent =
+          `Enter admin password to check out "${guest.name}":`;
+        document.getElementById('confirmPassword').value = '';
+        document.getElementById('confirmModalError').style.display = 'none';
+        document.getElementById('confirmModal').classList.remove('hidden');
+        document.getElementById('confirmPassword').focus();
+        return;
+      }
+
       if (action === 'edit') {
-        pendingEdit = { guestId: id, guestName: guest.name, table: guest.table_number };
-        const tableInput = document.getElementById('editTableNumber');
-        document.getElementById('editGuestName').textContent = guest.name;
-        tableInput.value = guest.table_number;
+        pendingEdit = { guestId: id };
+        document.getElementById('editName').value = guest.name || '';
         document.getElementById('editPassword').value = '';
         document.getElementById('editError').style.display = 'none';
         document.getElementById('editModal').classList.remove('hidden');
-        tableInput.focus();
-      } else if (action === 'delete') {
+        document.getElementById('editName').focus();
+        return;
+      }
+
+      if (action === 'delete') {
         pendingDelete = { guestId: id, guestName: guest.name };
         document.getElementById('deleteGuestName').textContent = guest.name;
         document.getElementById('deletePassword').value = '';
@@ -548,29 +967,161 @@
       }
     });
 
-    async function submitEditGuest() {
-      if (!pendingEdit) return;
-      const tableInput = document.getElementById('editTableNumber');
-      const passwordInput = document.getElementById('editPassword');
-      const errEl = document.getElementById('editError');
+    async function addAttendee() {
+      const name = document.getElementById('newName').value?.trim();
+      if (!name) {
+        alert('Name is required.');
+        return;
+      }
+      try {
+        const res = await fetch('/api/guests', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+          body: JSON.stringify({ name })
+        });
+        if (res.status === 401) { showLogin(); return; }
+        const data = await res.json();
+        if (res.ok && data.name) {
+          document.getElementById('newName').value = '';
+          loadGuests();
+        } else {
+          alert(data.error || 'Failed to add attendee.');
+        }
+      } catch {
+        alert('Failed to add attendee.');
+      }
+    }
+
+    function setImportStatus(type, message) {
+      const el = document.getElementById('importStatus');
+      el.className = 'visible ' + type;
+      el.textContent = message;
+    }
+
+    document.getElementById('importFile')?.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      e.target.value = '';
+      if (!file) return;
+
+      const btn = document.getElementById('importBtn');
+      btn.disabled = true;
+      setImportStatus('ok', 'Importing…');
+
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const res = await fetch('/api/guests/import', {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: formData
+        });
+        if (res.status === 401) {
+          showLogin();
+          return;
+        }
+        const data = await res.json();
+        if (!res.ok) {
+          setImportStatus('err', data.error || 'Import failed.');
+          return;
+        }
+        setImportStatus('ok', data.message || `Imported ${data.imported} guests.`);
+        loadGuests();
+      } catch {
+        setImportStatus('err', 'Could not upload the file. Please try again.');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    function closeConfirmModal() {
+      pendingConfirm = null;
+      document.getElementById('confirmModal').classList.add('hidden');
+    }
+
+    async function submitConfirmAction() {
+      if (!pendingConfirm) return;
+      const password = document.getElementById('confirmPassword').value;
+      const errEl = document.getElementById('confirmModalError');
       errEl.style.display = 'none';
-      const newTable = parseInt(tableInput.value, 10);
-      if (!newTable || newTable < 1) {
-        errEl.textContent = 'Please enter a valid table number.';
+      if (!password) {
+        errEl.textContent = 'Please enter the password.';
         errEl.style.display = 'block';
         return;
       }
-      const password = passwordInput.value;
+
+      try {
+        let res;
+        if (String(pendingConfirm.type).startsWith('bulk-')) {
+          const action = pendingConfirm.type.replace('bulk-', '');
+          res = await fetch('/api/admin/bulk', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+            body: JSON.stringify({
+              password,
+              action,
+              ids: pendingConfirm.ids
+            })
+          });
+        } else {
+          const path =
+            pendingConfirm.type === 'checkout'
+              ? '/api/admin/check-out/' + pendingConfirm.guestId
+              : '/api/admin/check-in/' + pendingConfirm.guestId;
+          res = await fetch(path, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+            body: JSON.stringify({ password })
+          });
+        }
+
+        const data = await res.json();
+        if (res.status === 401) {
+          if (data.error && /session|unauthorized/i.test(data.error) && !/invalid password/i.test(data.error)) {
+            showLogin();
+            return;
+          }
+          errEl.textContent = data.error || 'Invalid password.';
+          errEl.style.display = 'block';
+          return;
+        }
+        if (!res.ok) {
+          errEl.textContent = data.error || 'Action failed.';
+          errEl.style.display = 'block';
+          return;
+        }
+        if (String(pendingConfirm.type).startsWith('bulk-')) {
+          selectedIds.clear();
+        }
+        closeConfirmModal();
+        loadGuests();
+      } catch {
+        errEl.textContent = 'Could not complete the action.';
+        errEl.style.display = 'block';
+      }
+    }
+
+    async function submitEditGuest() {
+      if (!pendingEdit) return;
+      const name = document.getElementById('editName').value.trim();
+      const password = document.getElementById('editPassword').value;
+      const errEl = document.getElementById('editError');
+      errEl.style.display = 'none';
+      if (!name) {
+        errEl.textContent = 'Name is required.';
+        errEl.style.display = 'block';
+        return;
+      }
       if (!password) {
         errEl.textContent = 'Please enter the admin password.';
         errEl.style.display = 'block';
         return;
       }
       try {
-        const res = await fetch('/api/guests/' + pendingEdit.guestId + '/table', {
+        const res = await fetch('/api/guests/' + pendingEdit.guestId, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-          body: JSON.stringify({ password, table_number: newTable })
+          body: JSON.stringify({ password, name })
         });
         const data = await res.json();
         if (res.status === 401) {
@@ -578,15 +1129,16 @@
           errEl.style.display = 'block';
           return;
         }
-        if (data.success) {
-          const g = allGuests.find(x => x.id === pendingEdit.guestId);
-          if (g) g.table_number = newTable;
-          document.getElementById('editModal').classList.add('hidden');
-          pendingEdit = null;
-          renderGuestList();
+        if (!res.ok) {
+          errEl.textContent = data.error || 'Could not update.';
+          errEl.style.display = 'block';
+          return;
         }
-      } catch (e) {
-        errEl.textContent = 'Could not update guest.';
+        document.getElementById('editModal').classList.add('hidden');
+        pendingEdit = null;
+        loadGuests();
+      } catch {
+        errEl.textContent = 'Could not update attendee.';
         errEl.style.display = 'block';
       }
     }
@@ -598,10 +1150,9 @@
 
     async function submitDeleteGuest() {
       if (!pendingDelete) return;
-      const passwordInput = document.getElementById('deletePassword');
+      const password = document.getElementById('deletePassword').value;
       const errEl = document.getElementById('deleteError');
       errEl.style.display = 'none';
-      const password = passwordInput.value;
       if (!password) {
         errEl.textContent = 'Please enter the admin password.';
         errEl.style.display = 'block';
@@ -620,13 +1171,12 @@
           return;
         }
         if (data.success) {
-          allGuests = allGuests.filter(x => x.id !== pendingDelete.guestId);
           document.getElementById('deleteModal').classList.add('hidden');
           pendingDelete = null;
-          renderGuestList();
+          loadGuests();
         }
-      } catch (e) {
-        errEl.textContent = 'Could not delete guest.';
+      } catch {
+        errEl.textContent = 'Could not delete attendee.';
         errEl.style.display = 'block';
       }
     }

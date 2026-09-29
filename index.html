@@ -2,161 +2,410 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script>try{if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Find Your Table | 'MOPO'S Dinner Ceremony</title>
+  <title>2026 Africa Leadership Summit | Check-In</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Outfit:wght@300;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --ink: #1a1512;
-      --cream: #f9f6f2;
-      --gold: #b8860b;
-      --gold-dim: #8b6914;
-      --shadow: rgba(26, 21, 18, 0.08);
+      --navy: #00228a;
+      --navy-deep: #001a6b;
+      --navy-soft: #1a3aad;
+      --sky: #9ec8e8;
+      --sky-light: #c5dff2;
+      --ice: #e8f3fb;
+      --ink: #0c1a3a;
+      --muted: #4a5a78;
+      --white: #ffffff;
+      --shadow: rgba(0, 34, 138, 0.14);
+      --success: #1b7a3d;
+      --success-bg: #e6f6ec;
+      --error: #b42318;
+      --error-bg: #fdecea;
+      --info-bg: #eaf1ff;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Outfit', sans-serif;
-      background: var(--cream);
+      font-family: 'Source Sans 3', sans-serif;
+      color: var(--ink);
       min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 1.5rem;
-      color: var(--ink);
+      position: relative;
+      overflow-x: hidden;
+      background: #fff;
+    }
+    .shell {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      animation: riseIn 0.55s ease;
+    }
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .brand {
+      text-align: center;
+      margin-bottom: 0.25rem;
+    }
+    .brand img {
+      width: min(280px, 82vw);
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      filter: drop-shadow(0 8px 24px rgba(0, 26, 107, 0.25));
+      background: rgba(255,255,255,0.92);
+      border-radius: 14px;
+      padding: 0.65rem 0.9rem;
     }
     .card {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 12px 48px var(--shadow);
-      padding: 2.5rem;
-      max-width: 420px;
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 18px;
+      box-shadow: 0 18px 50px var(--shadow);
+      padding: 2rem 1.75rem 1.75rem;
       width: 100%;
       text-align: center;
+      border: 1px solid rgba(255,255,255,0.7);
+      backdrop-filter: blur(8px);
+    }
+    .eyebrow {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--navy);
+      margin-bottom: 0.55rem;
     }
     h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.75rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: var(--ink);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.45rem;
+      font-weight: 800;
+      margin-bottom: 0.4rem;
+      color: var(--navy-deep);
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
     }
     .sub {
-      font-size: 0.95rem;
-      font-weight: 300;
-      color: #666;
-      margin-bottom: 2rem;
+      font-size: 0.98rem;
+      font-weight: 400;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.45;
+    }
+    label {
+      display: block;
+      text-align: left;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 0.4rem;
     }
     .input-wrap {
       position: relative;
-      flex: 1;
-    }
-    .input-row {
-      display: flex;
-      gap: 0.75rem;
       margin-bottom: 1rem;
     }
-    input {
+    input[type="text"] {
       width: 100%;
-      padding: 0.9rem 1rem;
-      border: 1px solid #ddd;
-      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      border: 1.5px solid #c5d4ea;
+      border-radius: 12px;
       font-family: inherit;
-      font-size: 1rem;
+      font-size: 1.05rem;
+      min-height: 52px;
+      background: var(--ice);
+      color: var(--ink);
+      margin-bottom: 0;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--navy);
+      background: var(--white);
+      box-shadow: 0 0 0 3px rgba(0, 34, 138, 0.18);
     }
     .suggestions {
       position: absolute;
       left: 0;
       right: 0;
       top: 100%;
-      margin-top: 2px;
+      margin-top: 4px;
       background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 8px 24px var(--shadow);
-      max-height: 200px;
+      border: 1px solid #dce6f5;
+      border-radius: 12px;
+      box-shadow: 0 10px 28px var(--shadow);
+      max-height: 220px;
       overflow-y: auto;
-      z-index: 10;
+      z-index: 20;
       display: none;
+      text-align: left;
     }
     .suggestions.visible { display: block; }
     .suggestion {
-      padding: 0.7rem 1rem;
+      padding: 0.85rem 1rem;
       cursor: pointer;
-      font-size: 0.95rem;
-      border-bottom: 1px solid #f0f0f0;
+      font-size: 1rem;
+      border-bottom: 1px solid #eef2f8;
+      color: var(--ink);
     }
     .suggestion:last-child { border-bottom: none; }
-    .suggestion:hover { background: #f9f6f2; }
-    input:focus {
-      outline: none;
-      border-color: var(--gold);
-      box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.15);
+    .suggestion:hover,
+    .suggestion.active {
+      background: var(--ice);
+      color: var(--navy-deep);
     }
-    button {
-      padding: 0.9rem 1.5rem;
-      background: var(--gold);
+    .btn-primary {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      background: linear-gradient(180deg, var(--navy-soft), var(--navy));
       color: #fff;
       border: none;
-      border-radius: 10px;
-      font-family: inherit;
-      font-weight: 500;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    button:hover { background: var(--gold-dim); }
-    button:active { transform: scale(0.98); }
-    #result {
-      min-height: 2rem;
-      margin-top: 1rem;
+      border-radius: 12px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
       font-size: 1.05rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.12s, filter 0.2s, box-shadow 0.2s;
+      min-height: 52px;
+      box-shadow: 0 8px 20px rgba(0, 34, 138, 0.28);
     }
-    #result.found { color: var(--gold-dim); font-weight: 500; }
-    #result.error { color: #c0392b; }
+    .btn-primary:hover:not(:disabled) {
+      filter: brightness(1.06);
+      box-shadow: 0 10px 24px rgba(0, 34, 138, 0.35);
+    }
+    .btn-primary:active:not(:disabled) { transform: scale(0.98); }
+    .btn-primary:disabled {
+      background: #9aa8c4;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+    .status {
+      margin-top: 1.15rem;
+      padding: 1rem 1.1rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      line-height: 1.45;
+      display: none;
+    }
+    .status.visible { display: block; }
+    .status.error { background: var(--error-bg); color: var(--error); }
+    .status.loading { background: var(--ice); color: var(--muted); }
+    .outcome {
+      display: none;
+      animation: fadeIn 0.35s ease;
+    }
+    .outcome.visible { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .outcome-icon {
+      font-size: 2.4rem;
+      margin-bottom: 0.65rem;
+      line-height: 1;
+    }
+    .outcome h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .outcome p {
+      font-size: 1.05rem;
+      color: #334466;
+      line-height: 1.5;
+      margin-bottom: 0.45rem;
+    }
+    .outcome .hint { margin-top: 1rem; }
+    .outcome.success {
+      background: var(--success-bg);
+      padding: 1.5rem 1.25rem;
+      border-radius: 14px;
+    }
+    .outcome.success h2,
+    .outcome.success p { color: var(--success); }
+    .outcome.already {
+      background: var(--info-bg);
+      padding: 1.5rem 1.25rem;
+      border-radius: 14px;
+    }
+    .outcome.already h2 { color: var(--navy); }
+    .outcome.not-found {
+      background: var(--error-bg);
+      padding: 1.5rem 1.25rem;
+      border-radius: 14px;
+    }
+    .outcome.not-found h2 { color: var(--error); }
+    .form-panel.hidden { display: none; }
+    .event-meta {
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid #dce6f5;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .event-meta strong {
+      display: block;
+      color: var(--navy);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 0.2rem;
+    }
     .admin-link {
-      margin-top: 2rem;
+      margin-top: 0.25rem;
       font-size: 0.85rem;
     }
     .admin-link a {
-      color: var(--gold);
+      color: var(--navy);
       text-decoration: none;
+      font-weight: 600;
     }
     .admin-link a:hover { text-decoration: underline; }
+    .theme-toggle {
+      position: fixed;
+      top: 0.85rem;
+      right: 0.85rem;
+      z-index: 50;
+      width: 42px;
+      height: 42px;
+      min-height: 42px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--navy);
+      background: #fff;
+      border: 1.5px solid #c5d4ea;
+      border-radius: 50%;
+      box-shadow: 0 4px 16px var(--shadow);
+      cursor: pointer;
+    }
+    .theme-toggle svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --navy: #8eb4ff;
+      --navy-deep: #d6e4ff;
+      --navy-soft: #4d78e8;
+      --ice: #1c2740;
+      --ink: #e8eef8;
+      --muted: #a8b6d0;
+      --white: #141c2f;
+      --shadow: rgba(0, 0, 0, 0.35);
+      --success: #7dcea0;
+      --success-bg: #143024;
+      --error: #f5a8a1;
+      --error-bg: #3a1c1c;
+      --info-bg: #1a2744;
+    }
+    html[data-theme="dark"] body { background: #0b1220; }
+    html[data-theme="dark"] .brand img,
+    html[data-theme="dark"] .card,
+    html[data-theme="dark"] .suggestions { background: #141c2f; }
+    html[data-theme="dark"] .card { border-color: #2a3a5c; }
+    html[data-theme="dark"] input[type="text"] { border-color: #3a4d73; }
+    html[data-theme="dark"] .suggestion { border-bottom-color: #24324d; }
+    html[data-theme="dark"] .outcome p { color: #c5d0e4; }
+    html[data-theme="dark"] .event-meta { border-top-color: #2a3a5c; }
+    html[data-theme="dark"] .theme-toggle {
+      background: #1c2740;
+      color: #d6e4ff;
+      border-color: #3a4d73;
+    }
 
     @media (max-width: 480px) {
-      body { padding: 1rem; min-height: 100vh; min-height: 100dvh; }
-      .card { padding: 1.5rem; border-radius: 12px; }
-      h1 { font-size: 1.35rem; }
-      .sub { font-size: 0.9rem; margin-bottom: 1.5rem; }
-      .input-row { flex-direction: column; gap: 0.5rem; }
-      .input-row button { width: 100%; min-height: 48px; padding: 1rem; }
-      input { padding: 1rem; font-size: 16px; min-height: 48px; }
-      .suggestion { padding: 1rem; min-height: 48px; }
-      .suggestions { max-height: 180px; }
-      .admin-link { margin-top: 1.5rem; }
+      body { padding: 1rem; }
+      .card { padding: 1.5rem 1.2rem 1.35rem; border-radius: 14px; }
+      h1 { font-size: 1.2rem; }
+      .sub { font-size: 0.92rem; margin-bottom: 1.25rem; }
+      input[type="text"] { font-size: 16px; }
+      .brand img { width: min(240px, 88vw); padding: 0.5rem 0.7rem; }
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1> WELCOME 🎉 <br> ~~~~~~~~~~~~~~~~~~~~~~~~~ <br> The Moment To Celebrate A Graceful Milestone Has Arrived.  <br>~~~~~~~~~~~~~~~~~~~~~~~~ <br> Kindly Find Your Table</h1>
-    <p class="sub">Enter your name to see your table assignment</p>
-
-    <div class="input-row">
-      <div class="input-wrap">
-        <input id="name" placeholder="e.g. Mary Johnson" type="text" autocomplete="off">
-        <div id="suggestions" class="suggestions" role="listbox"></div>
-      </div>
-      <button onclick="findTable()">Find</button>
+  <button type="button" id="themeToggle" class="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false"></button>
+  <div class="shell">
+    <div class="brand">
+      <img src="assets/logo.jpeg" alt="New Day Global Network" width="280" height="auto">
     </div>
 
-    <p id="result"></p>
+    <div class="card">
+      <div id="formPanel" class="form-panel">
+        <p class="eyebrow">Welcome</p>
+        <h1 id="eventTitle">2026 Africa Leadership Summit</h1>
+        <p class="sub">Enter your name below to confirm your attendance.</p>
 
-    <p class="admin-link"><a href="admin.html">Admin → Manage guests</a></p>
+        <form id="checkInForm" novalidate>
+          <label for="name">Full name</label>
+          <div class="input-wrap">
+            <input
+              id="name"
+              name="name"
+              type="text"
+              autocomplete="off"
+              autocapitalize="words"
+              spellcheck="false"
+              placeholder="Start typing your name…"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-controls="suggestions"
+              aria-expanded="false"
+              required
+            >
+            <div id="suggestions" class="suggestions" role="listbox"></div>
+          </div>
+          <button type="submit" class="btn-primary" id="checkInBtn">Check In</button>
+        </form>
+
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+
+        <div class="event-meta">
+          <strong>8–10 October 2026</strong>
+          Bible Life Ministries · Gaborone, Botswana
+        </div>
+      </div>
+
+      <div id="outcomeNotFound" class="outcome not-found" role="status">
+        <h2>We couldn't find your RSVP</h2>
+        <p>Please check that your details are correct or speak to a member of the registration team.</p>
+        <p class="hint">
+          <button type="button" class="btn-primary" id="tryAgainBtn">Try again</button>
+        </p>
+      </div>
+    </div>
+
+    <p class="admin-link"><a href="admin.html">Staff / Admin →</a></p>
   </div>
 
+  <script src="theme.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
