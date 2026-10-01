@@ -5,6 +5,7 @@
   <script>try{if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Confirm Attendance</title>
+  <link rel="icon" href="assets/logo.jpeg" type="image/jpeg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
@@ -95,8 +96,52 @@
     .sub {
       font-size: 0.98rem;
       color: var(--muted);
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
       line-height: 1.45;
+    }
+    .graduate-picker {
+      text-align: left;
+      margin: 0 0 1.15rem;
+      border: 0;
+      padding: 0;
+    }
+    .graduate-picker legend {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--navy);
+      margin-bottom: 0.65rem;
+    }
+    .graduate-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+    .graduate-option {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      min-height: 48px;
+      padding: 0.7rem 0.75rem;
+      border: 1.5px solid #c5d4ea;
+      border-radius: 12px;
+      background: #fff;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .graduate-option:has(input:checked) {
+      border-color: var(--navy);
+      background: var(--ice);
+      box-shadow: inset 3px 0 0 var(--navy);
+    }
+    .graduate-option input {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: var(--navy);
     }
     .btn-primary {
       width: 100%;
@@ -218,6 +263,15 @@
     html[data-theme="dark"] .card { background: #141c2f; }
     html[data-theme="dark"] .card { border-color: #2a3a5c; }
     html[data-theme="dark"] .outcome p { color: #c5d0e4; }
+    html[data-theme="dark"] .graduate-option {
+      background: #1c2740;
+      border-color: #3a4d73;
+      color: #e8eef8;
+    }
+    html[data-theme="dark"] .graduate-option:has(input:checked) {
+      background: #243456;
+      border-color: #8eb4ff;
+    }
     html[data-theme="dark"] .theme-toggle {
       background: #1c2740;
       color: #d6e4ff;
@@ -243,7 +297,20 @@
         <p class="eyebrow">Almost done</p>
         <h1>Confirm attendance</h1>
         <p class="guest-name" id="displayName">—</p>
-        <p class="sub">Tap the button below to record your attendance for the summit.</p>
+        <p class="sub">Answer the question below, then confirm your attendance.</p>
+        <fieldset class="graduate-picker">
+          <legend>Are you graduating?</legend>
+          <div class="graduate-options">
+            <label class="graduate-option">
+              <input type="radio" name="graduating" value="yes">
+              Yes
+            </label>
+            <label class="graduate-option">
+              <input type="radio" name="graduating" value="no">
+              No
+            </label>
+          </div>
+        </fieldset>
         <button type="button" class="btn-primary" id="confirmBtn">Confirm attendance</button>
         <div id="status" class="status" role="status" aria-live="polite"></div>
       </div>
@@ -316,8 +383,20 @@
 
     let submitting = false;
 
+    function selectedGraduating() {
+      const chosen = document.querySelector('input[name="graduating"]:checked');
+      if (!chosen) return null;
+      return chosen.value === 'yes';
+    }
+
     confirmBtn.addEventListener('click', async () => {
       if (submitting) return;
+      const graduating = selectedGraduating();
+      if (graduating === null) {
+        statusEl.className = 'status visible error';
+        statusEl.textContent = 'Please choose whether you are graduating.';
+        return;
+      }
       submitting = true;
       confirmBtn.disabled = true;
       statusEl.className = 'status visible loading';
@@ -327,9 +406,17 @@
         const res = await fetch('/api/check-in/confirm', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: Number(id), name })
+          body: JSON.stringify({ id: Number(id), name, graduating })
         });
         const data = await res.json();
+
+        if (!res.ok && /graduating/i.test(data.error || '')) {
+          statusEl.className = 'status visible error';
+          statusEl.textContent = data.error;
+          submitting = false;
+          confirmBtn.disabled = false;
+          return;
+        }
 
         if (data.status === 'checked_in') {
           document.getElementById('successName').textContent = data.firstName || firstName;

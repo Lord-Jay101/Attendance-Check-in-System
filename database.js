@@ -38,6 +38,7 @@ function initDatabase() {
   addColumn('email', 'email TEXT');
   addColumn('checked_in_at', 'checked_in_at DATETIME');
   addColumn('check_in_method', 'check_in_method TEXT');
+  addColumn('graduating', 'graduating INTEGER');
 
   // Unique email (case-insensitive) — only for rows that have an email
   db.exec(`
@@ -69,6 +70,7 @@ function mapGuest(row) {
     seated: !!row.seated,
     checked_in_at: row.checked_in_at || null,
     check_in_method: row.check_in_method || null,
+    graduating: row.graduating == null ? null : row.graduating === 1,
     created_at: row.created_at || null
   };
 }
@@ -80,7 +82,7 @@ function findGuestByEmail(email) {
   const stmt = db.prepare(`
     SELECT id, name, email, table_number,
            COALESCE(seated, 0) AS seated,
-           checked_in_at, check_in_method, created_at
+           checked_in_at, check_in_method, graduating, created_at
     FROM guests
     WHERE email IS NOT NULL
       AND LOWER(TRIM(email)) = ?
@@ -95,7 +97,7 @@ function findGuestByName(name) {
   const stmt = db.prepare(`
     SELECT id, name, email, table_number,
            COALESCE(seated, 0) AS seated,
-           checked_in_at, check_in_method, created_at
+           checked_in_at, check_in_method, graduating, created_at
     FROM guests
     WHERE LOWER(TRIM(name)) = LOWER(TRIM(?))
   `);
@@ -109,7 +111,7 @@ function findGuestById(id) {
   const stmt = db.prepare(`
     SELECT id, name, email, table_number,
            COALESCE(seated, 0) AS seated,
-           checked_in_at, check_in_method, created_at
+           checked_in_at, check_in_method, graduating, created_at
     FROM guests
     WHERE id = ?
   `);
@@ -123,24 +125,32 @@ function findGuestById(id) {
  * Returns { ok, alreadyCheckedIn, guest } — uniqueness enforced by
  * UPDATE ... WHERE seated = 0 (no duplicate attendance).
  */
-function checkInGuest(id, method) {
+function checkInGuest(id, method, graduating) {
   const db = getDb();
   const now = new Date().toISOString();
   const checkInMethod = method === 'manual' ? 'manual' : 'self';
+  const hasAnswer = graduating === true || graduating === false;
 
   const update = db.prepare(`
     UPDATE guests
     SET seated = 1,
         checked_in_at = ?,
-        check_in_method = ?
+        check_in_method = ?,
+        graduating = CASE WHEN ? = 1 THEN ? ELSE graduating END
     WHERE id = ? AND COALESCE(seated, 0) = 0
   `);
-  const result = update.run(now, checkInMethod, id);
+  const result = update.run(
+    now,
+    checkInMethod,
+    hasAnswer ? 1 : 0,
+    hasAnswer ? (graduating ? 1 : 0) : null,
+    id
+  );
 
   const select = db.prepare(`
     SELECT id, name, email, table_number,
            COALESCE(seated, 0) AS seated,
-           checked_in_at, check_in_method, created_at
+           checked_in_at, check_in_method, graduating, created_at
     FROM guests
     WHERE id = ?
   `);
@@ -301,7 +311,7 @@ function searchGuests(query) {
   const stmt = db.prepare(`
     SELECT id, name, email, table_number,
            COALESCE(seated, 0) AS seated,
-           checked_in_at, check_in_method, created_at
+           checked_in_at, check_in_method, graduating, created_at
     FROM guests
     WHERE LOWER(name) LIKE LOWER(?)
        OR (email IS NOT NULL AND LOWER(email) LIKE LOWER(?))
@@ -419,7 +429,7 @@ function getAllGuests() {
   const stmt = db.prepare(`
     SELECT id, name, email, table_number,
            COALESCE(seated, 0) AS seated,
-           checked_in_at, check_in_method, created_at
+           checked_in_at, check_in_method, graduating, created_at
     FROM guests
     ORDER BY name
   `);

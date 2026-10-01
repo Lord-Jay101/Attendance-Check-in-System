@@ -5,6 +5,7 @@
   <script>try{if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Admin | 2026 Africa Leadership Summit</title>
+  <link rel="icon" href="assets/logo.jpeg" type="image/jpeg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
@@ -600,6 +601,7 @@
             <th>Attendance</th>
             <th>Check-in time</th>
             <th>Method</th>
+            <th>Graduating</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -850,7 +852,7 @@
 
       const tbody = document.getElementById('guestList');
       if (!filtered.length) {
-        tbody.innerHTML = '<tr><td colspan="7" style="color:#888;text-align:center;">No attendees match.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="color:#888;text-align:center;">No attendees match.</td></tr>';
         updateBulkBar();
         return;
       }
@@ -871,6 +873,7 @@
           </td>
           <td>${escapeHtml(formatTime(g.checked_in_at))}</td>
           <td>${escapeHtml(methodLabel(g.check_in_method))}</td>
+          <td>${g.graduating === true ? '<span class="badge yes">Yes</span>' : g.graduating === false ? '<span class="badge no">No</span>' : '—'}</td>
           <td class="actions-cell">
             ${g.checked_in
               ? `<button type="button" class="action-btn secondary" data-action="checkout" data-id="${g.id}">Check out</button>`

@@ -65,6 +65,12 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed) && trimmed.length <= 254;
 }
 
+function parseGraduating(value) {
+  if (value === true || value === 'yes' || value === 'Yes') return true;
+  if (value === false || value === 'no' || value === 'No') return false;
+  return null;
+}
+
 function formatCheckInTime(iso) {
   if (!iso) return null;
   try {
@@ -203,7 +209,15 @@ app.post('/api/check-in/confirm', (req, res) => {
       });
     }
 
-    const result = checkInGuest(guest.id, 'self');
+    const graduating = parseGraduating(req.body?.graduating);
+    if (graduating === null) {
+      return res.status(400).json({
+        status: 'error',
+        error: 'Please choose whether you are graduating.'
+      });
+    }
+
+    const result = checkInGuest(guest.id, 'self', graduating);
     if (result.alreadyCheckedIn) {
       return res.json({
         status: 'already_checked_in',
